@@ -51,9 +51,13 @@ function love.load()
     skin.front = love.graphics.newCanvas(256, 256)
     skin.back = love.graphics.newCanvas(256, 256)
 
+    drawing = false
+    drawX = 0
+    drawY = 0
+
     -- set the initial pattern
     local startState = love.image.newImageData(256, 256)
-    startState:mapPixel(patterns.random)
+    startState:mapPixel(patterns.plaid)
 
     -- fill the pattern into the front buffer
     local startImage = love.graphics.newImage(startState)
@@ -104,21 +108,58 @@ function love.update(dt)
     local my = (love.mouse.getY() - canvasPosition.y)*canvasPosition.srcH/canvasPosition.destH
 
     -- is the mouse down?
-    if love.mouse.isDown(1) then
-        if (mx >= 0) and (mx < 48) and (my >= 0) and (my < 256) then
+    if (mx >= 0) and (mx < 48) and (my >= 0) and (my < 256) then
+        if (love.mouse.isDown(1)) then
             -- color picker
             pickedColor = {colorPicker:getPixel(mx, my)}
         end
-
-        if (mx >= 128) and (mx < 384) and (my >= 0) and (my < 256) then
-            -- paint into the skin texture
-            local lx = mx - 128
-            skin.front:renderTo(function()
-                love.graphics.setColor(unpack(pickedColor))
-                love.graphics.ellipse("fill", lx, my, 5, 5)
-            end)
-        end
     end
+
+    if (mx >= 128) and (mx < 384) and (my >= 0) and (my < 256) and love.mouse.isDown(1) then
+        local prevDrawing = drawing
+        drawing = true
+
+        local prevRadius = radius
+        radius = 5
+
+        local prevX, prevY = drawX, drawY
+        drawX, drawY = mx - 128, my
+        local deltaX = drawX - prevX
+        local deltaY = drawY - prevY
+        local distance = math.sqrt(deltaX*deltaX + deltaY*deltaY)
+
+        if prevDrawing then
+            radius = radius/math.max(1,distance/4)
+        end
+
+        -- paint into the skin texture
+
+        -- draw endcap
+        skin.front:renderTo(function()
+            love.graphics.setColor(unpack(pickedColor))
+
+            for dx=-256,256,256 do
+                for dy=-256,256,256 do
+                    love.graphics.ellipse("fill", drawX+dx, drawY+dy, radius, radius)
+                end
+            end
+
+            -- draw stroke
+            if prevDrawing then
+                local px, py = deltaY/distance, -deltaX/distance
+                love.graphics.polygon("fill",
+                    prevX + px*prevRadius, prevY + py*prevRadius,
+                    prevX - px*prevRadius, prevY - py*prevRadius,
+                    drawX - px*radius,     drawY - py*radius,
+                    drawX + px*radius,     drawY + py*radius
+                    )
+            end
+        end)
+    else
+        drawing = false
+    end
+    prevDrawing = drawing
+    prevCoods = coords
 
     -- grab the color from the cursor position (slow, should come last)
     if love.mouse.isDown(2) then

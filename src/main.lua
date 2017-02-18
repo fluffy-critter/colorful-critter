@@ -30,22 +30,12 @@ function love.load()
     colorPicker = love.graphics.newImage("assets/gradient.png")
 
     local skinTexture = love.graphics.newCanvas(256, 256)
-    love.graphics.setCanvas(skinTexture)
-    love.graphics.clear(127,0,255)
-    for i = 1,100 do
-        love.graphics.setColor(math.random(0,255), math.random(0,255), math.random(0,255))
-        local x = math.random(0,255)
-        local y = math.random(0,255)
-        local r = math.random(5,16)
-        for xa=-256,256,256 do
-            for ya=-256,256,256 do
-                love.graphics.ellipse("fill", x + xa, y + ya, r, r)
-            end
-        end
-    end
-    love.graphics.setCanvas()
-
     skinData = skinTexture:newImageData()
+    skinData:mapPixel(
+        function(x,y,r,g,b,a)
+            return (math.floor((x+y)/32)%2 + math.floor((y-x)/32)%2)*64 + 32, 32, 32, 255
+        end
+    )
     skinImage = love.graphics.newImage(skinData)
 end
 
@@ -67,7 +57,8 @@ function love.draw()
 end
 
 function love.update(dt)
-    for i=1,16 do
+    -- stir up the chromatophores a bit
+    for i=1,100 do
         skinData:setPixel(math.random(0,255), math.random(0,255),
             math.random(0,255), math.random(0,255), math.random(0,255))
     end

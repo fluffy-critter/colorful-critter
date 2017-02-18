@@ -7,4 +7,6 @@ function love.conf(t)
     -- vertical padding for FPS, remove for release
     t.window.height = t.window.height + 40
     t.version = "0.10.2"
+
+    t.window.title = "Colorful Critter"
 end

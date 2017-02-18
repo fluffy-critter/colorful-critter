@@ -56,25 +56,35 @@ function love.load()
     colorPicker = love.image.newImageData("assets/gradient.png")
     colorPickerImage = love.graphics.newImage(colorPicker)
 
-    critter.texCoords = love.graphics.newImage("assets/critter-texcoords.png")
+    critter.texCoords = {
+        love.graphics.newImage("assets/critter-uv1.png"),
+        love.graphics.newImage("assets/critter-uv2.png")
+    }
+    critter.overlays = {
+        love.graphics.newImage("assets/critter-overlay.png")
+    }
 
     reduceShader = love.graphics.newShader("reduce.fs")
     remapShader = love.graphics.newShader("remap.fs")
 
+    -- initialize the skin
     skin = {}
 
     skin.front = love.graphics.newCanvas(256, 256)
     skin.back = love.graphics.newCanvas(256, 256)
 
-    -- set the initial pattern
-    local startState = love.image.newImageData(256, 256)
-    startState:mapPixel(patterns.plaid)
+    skin.front:renderTo(function()
+        -- set the initial pattern
+        local startState = love.image.newImageData(256, 256)
+        startState:mapPixel(patterns.plaid)
+        local startImage = love.graphics.newImage(startState)
+        love.graphics.draw(startImage)
 
-    -- fill the pattern into the front buffer
-    local startImage = love.graphics.newImage(startState)
-    love.graphics.setCanvas(skin.front)
-    love.graphics.draw(startImage)
-    love.graphics.setCanvas()
+        love.graphics.setColor(255,255,127)
+        love.graphics.rectangle("fill", 0, 0, 64, 64)
+        love.graphics.rectangle("fill", 192, 0, 64, 64)
+        love.graphics.setColor(255,255,255)
+    end)
 end
 
 function love.draw()
@@ -85,20 +95,28 @@ function love.draw()
     love.graphics.setColor(255, 255, 255)
     love.graphics.draw(colorPickerImage, 0, 0)
 
-    love.graphics.setColor(0,0,0,255)
+    love.graphics.setColor(0,0,0)
     love.graphics.rectangle("fill", colorPicker:getWidth(), 0, 32, 32)
     love.graphics.setColor(unpack(pen.color))
     love.graphics.ellipse("fill", colorPicker:getWidth() + 16, 16, pen.size, pen.size)
+    love.graphics.setColor(255,255,255)
 
     -- draw the critter's skin preview
     -- love.graphics.setColor(255, 255, 255)
     -- love.graphics.draw(skin.front, 128, 0, 0)
 
     -- draw the critter
+    love.graphics.setBlendMode("alpha", "premultiplied")
     love.graphics.setShader(remapShader)
     remapShader:send("referred", skin.front)
-    love.graphics.draw(critter.texCoords, 128, 0)
+    for _,tc in pairs(critter.texCoords) do
+        love.graphics.draw(tc, 128, 0)
+    end
+    love.graphics.setBlendMode("alpha", "alphamultiply")
     love.graphics.setShader()
+    for _,ov in pairs(critter.overlays) do
+        love.graphics.draw(ov, 128, 0)
+    end
 
     -- draw the paint overlay
     love.graphics.draw(paintOverlay)

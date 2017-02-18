@@ -62,21 +62,21 @@ function love.load()
 end
 
 function chromatophoreReduce(front, back, x0, y0, w, h)
-    -- this can probably be done faster using pointer stuff
+    -- this can probably be done faster using pointer stuff or maybe on-GPU
+    local offsets = {{0,0},{-1,0},{1,0},{0,-1},{0,1}}
     for j = 0, h - 1 do
         for i = 0, w - 1 do
             local counts = {}
             local maxCount = 0
             local maxColor
-            for dx = -1,1 do
-                for dy = -1,1 do
-                    local r,g,b,a = front:getPixel((i+dx)%w + x0, (j+dy)%h + y0)
-                    local c = r*65536 + g*256 + b
-                    counts[c] = (counts[c] or 0) + 1
-                    if counts[c] >= maxCount then
-                        maxColor = {r,g,b,a}
-                        maxCount = counts[c]
-                    end
+            for _,pos in pairs(offsets) do
+                local dx,dy = unpack(pos)
+                local r,g,b,a = front:getPixel((i+dx)%w + x0, (j+dy)%h + y0)
+                local c = r*65536 + g*256 + b
+                counts[c] = (counts[c] or 0) + 1
+                if counts[c] >= maxCount then
+                    maxColor = {r,g,b,a}
+                    maxCount = counts[c]
                 end
             end
             back:setPixel(x0 + i, y0 + j, unpack(maxColor))
@@ -109,8 +109,8 @@ end
 function love.update(dt)
     -- stir up the chromatophores a bit
     for i=1,critter.tense do
-        skin.front.data:setPixel(math.random(0,255), math.random(0,255),
-            math.random(0,255), math.random(0,255), math.random(0,255))
+        local color = {skin.front.data:getPixel(math.random(0,255), math.random(0,255))}
+        skin.front.data:setPixel(math.random(0,255), math.random(0,255), unpack(color))
     end
 
     -- reduce front buffer into backbuffer
@@ -137,11 +137,17 @@ function love.update(dt)
         if (mx >= 128) and (mx < 384) and (my >= 0) and (my < 256) then
             -- paint into the skin texture
             local lx = mx - 128
-            for i = -5,5 do
-                for j = -5,5 do
+            for j = -5,5 do
+                for i = -5,5 do
                     skin.front.data:setPixel((i + lx)%256, (j + my)%256, unpack(pickedColor))
                 end
             end
         end
+    end
+
+    -- grab the color from the cursor position (slow)
+    if love.mouse.isDown(2) then
+        local foo = screen:newImageData()
+        pickedColor = {foo:getPixel(mx, my)}
     end
 end

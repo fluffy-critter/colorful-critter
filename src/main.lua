@@ -1,5 +1,7 @@
 patterns = require('patterns')
 
+critter = {}
+
 canvasPosition = {
     x = 0,
     y = 0,
@@ -52,7 +54,10 @@ function love.load()
     colorPicker = love.image.newImageData("assets/gradient.png")
     colorPickerImage = love.graphics.newImage(colorPicker)
 
+    critter.texCoords = love.graphics.newImage("assets/critter-texcoords.png")
+
     reduceShader = love.graphics.newShader("reduce.fs")
+    remapShader = love.graphics.newShader("remap.fs")
 
     skin = {}
 
@@ -86,6 +91,12 @@ function love.draw()
     -- draw the critter's skin preview
     love.graphics.setColor(255, 255, 255)
     love.graphics.draw(skin.front, 128, 0, 0)
+
+    -- draw the critter
+    love.graphics.setShader(remapShader)
+    remapShader:send("referred", skin.front)
+    love.graphics.draw(critter.texCoords, 128, 0)
+    love.graphics.setShader()
 
     -- blit the screen
     love.graphics.setCanvas()

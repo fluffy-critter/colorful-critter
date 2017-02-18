@@ -58,7 +58,7 @@ function love.load()
     skin.back.data = love.image.newImageData(256, 256)
     skin.back.image = love.graphics.newImage(skin.back.data)
 
-    skin.front.data:mapPixel(patterns.splotchy)
+    skin.front.data:mapPixel(patterns.random)
 end
 
 function chromatophoreReduce(front, back, x0, y0, w, h)
@@ -74,7 +74,7 @@ function chromatophoreReduce(front, back, x0, y0, w, h)
                 local r,g,b,a = front:getPixel((i+dx)%w + x0, (j+dy)%h + y0)
                 local c = r*65536 + g*256 + b
                 counts[c] = (counts[c] or 0) + 1
-                if counts[c] >= maxCount then
+                if counts[c] > maxCount then
                     maxColor = {r,g,b,a}
                     maxCount = counts[c]
                 end

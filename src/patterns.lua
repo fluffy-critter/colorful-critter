@@ -10,7 +10,12 @@ function splotchy(x,y,r,g,b,a)
     return color[1], color[2], color[3], 255
 end
 
+function random(x,y,r,g,b,a)
+    return math.random(0,4)*63,math.random(0,4)*63,math.random(0,4)*63,255
+end
+
 return {
     plaid=plaid,
-    splotchy=splotchy
+    splotchy=splotchy,
+    random=random
 }

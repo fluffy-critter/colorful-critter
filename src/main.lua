@@ -84,9 +84,9 @@ function love.draw()
     love.graphics.draw(colorPickerImage, 0, 0)
 
     love.graphics.setColor(0,0,0,255)
-    love.graphics.rectangle("fill", colorPicker:getWidth(), 0, 16, 16)
+    love.graphics.rectangle("fill", colorPicker:getWidth(), 0, 32, 32)
     love.graphics.setColor(unpack(pen.color))
-    love.graphics.ellipse("fill", colorPicker:getWidth() + 8, 8, pen.size, pen.size)
+    love.graphics.ellipse("fill", colorPicker:getWidth() + 16, 16, pen.size, pen.size)
 
     -- draw the critter's skin preview
     love.graphics.setColor(255, 255, 255)
@@ -132,10 +132,10 @@ function love.update(dt)
     end
 
     -- size adjust
-    if (mx >= 48) and (mx < 48 + 16) and (my >= 0) and (my < 16) and love.mouse.isDown(1) then
-        local x = mx - 48 - 8
-        local y = my - 8
-        pen.size = math.min(8, math.sqrt(x*x + y*y))
+    if (mx >= 48) and (mx < 48 + 32) and (my >= 0) and (my < 32) and love.mouse.isDown(1) then
+        local x = mx - 48 - 16
+        local y = my - 16
+        pen.size = math.min(16, math.sqrt(x*x + y*y))
     end
 
     -- paint strokes

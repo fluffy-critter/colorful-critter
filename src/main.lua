@@ -51,6 +51,8 @@ function love.load()
     screen = love.graphics.newCanvas(384, 256)
     screen:setFilter("nearest", "nearest")
 
+    paintOverlay = love.graphics.newCanvas(384, 256)
+
     colorPicker = love.image.newImageData("assets/gradient.png")
     colorPickerImage = love.graphics.newImage(colorPicker)
 
@@ -89,14 +91,17 @@ function love.draw()
     love.graphics.ellipse("fill", colorPicker:getWidth() + 16, 16, pen.size, pen.size)
 
     -- draw the critter's skin preview
-    love.graphics.setColor(255, 255, 255)
-    love.graphics.draw(skin.front, 128, 0, 0)
+    -- love.graphics.setColor(255, 255, 255)
+    -- love.graphics.draw(skin.front, 128, 0, 0)
 
     -- draw the critter
     love.graphics.setShader(remapShader)
     remapShader:send("referred", skin.front)
     love.graphics.draw(critter.texCoords, 128, 0)
     love.graphics.setShader()
+
+    -- draw the paint overlay
+    love.graphics.draw(paintOverlay)
 
     -- blit the screen
     love.graphics.setCanvas()
@@ -117,40 +122,41 @@ end
 function love.update(dt)
     -- reduce front buffer into backbuffer
     reduceChromatophores(skin.front, skin.back, 0, 0, 256, 256)
-
-    -- swap the back and front buffers
     skin.front,skin.back = skin.back,skin.front
 
+    -- clear the paint overlay
+    paintOverlay:renderTo(function()
+        love.graphics.clear(0,0,0,0)
+    end)
+
+    -- handle mouse controls
     local mx = (love.mouse.getX() - canvasPosition.x)*canvasPosition.srcW/canvasPosition.destW
     local my = (love.mouse.getY() - canvasPosition.y)*canvasPosition.srcH/canvasPosition.destH
 
-    -- color picker
+    local prevDrawing = pen.drawing
+    pen.drawing = false
+
     if (mx >= 0) and (mx < 48) and (my >= 0) and (my < 256) then
+        -- color picker
         if (love.mouse.isDown(1)) then
             pen.color = {colorPicker:getPixel(mx, my)}
         end
-    end
-
-    -- size adjust
-    if (mx >= 48) and (mx < 48 + 32) and (my >= 0) and (my < 32) and love.mouse.isDown(1) then
-        local x = mx - 48 - 16
-        local y = my - 16
-        pen.size = math.min(16, math.sqrt(x*x + y*y))
-    end
-
-    -- paint strokes
-    if (mx >= 128) and (mx < 384)
-        and (my >= 0)
-        and (my < 256)
-        and love.mouse.isDown(1) then
-        local prevDrawing = pen.drawing
+    elseif (mx >= 48) and (mx < 48 + 32) and (my >= 0) and (my < 32) then
+        -- size adjust
+        if love.mouse.isDown(1) then
+            local x = mx - 48 - 16
+            local y = my - 16
+            pen.size = math.min(16, math.sqrt(x*x + y*y))
+        end
+    elseif love.mouse.isDown(1) then
+        -- paint strokes
         pen.drawing = true
 
         local prevRadius = pen.radius
         pen.radius = pen.size
 
         local prevX, prevY = pen.x, pen.y
-        pen.x, pen.y = mx - 128, my
+        pen.x, pen.y = mx, my
         local deltaX = pen.x - prevX
         local deltaY = pen.y - prevY
         local distance = math.sqrt(deltaX*deltaX + deltaY*deltaY)
@@ -159,8 +165,8 @@ function love.update(dt)
             pen.radius = pen.radius/math.max(1,distance/4)
         end
 
-        -- paint into the skin texture
-        skin.front:renderTo(function()
+        -- paint into the paint overlay texture
+        paintOverlay:renderTo(function()
             love.graphics.setColor(unpack(pen.color))
 
             -- draw endcap
@@ -177,8 +183,12 @@ function love.update(dt)
                     )
             end
         end)
-    else
-        pen.drawing = false
+
+        -- and also copy that into the texture
+        skin.front:renderTo(function()
+            love.graphics.setColor(255,255,255)
+            love.graphics.draw(paintOverlay, 256-384, 0)
+        end)
     end
 
     -- grab the color from the cursor position (slow, should come last)

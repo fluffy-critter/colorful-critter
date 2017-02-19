@@ -362,7 +362,7 @@ function love.update(dt)
         -- get the skin location
         local prevSX, prevSY = pen.skinX, pen.skinY
         local remapped = {critter.poseMap:getPixel(pen.x, pen.y)}
-        if remapped[3] > 127 then
+        if remapped[3] > 192 then
             -- pen was on the critter, so re-draw in object space
             pen.skinX, pen.skinY = remapped[1], remapped[2]
             touched = true

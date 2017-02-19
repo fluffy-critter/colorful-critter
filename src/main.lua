@@ -361,7 +361,7 @@ function love.update(dt)
 
         -- redraw the pen stroke into the skin buffer
         skin.front:renderTo(function()
-            love.graphics.setColor(unpack(pen.color))
+            love.graphics.setColor(unpack(unshiftColor))
 
             love.graphics.ellipse("fill", pen.skinX, pen.skinY, pen.radius, pen.radius)
             if prevDrawing then

@@ -9,7 +9,9 @@ critter = {
     saturation = 1,
     hueshift = 0,
     x = (384 - 256)/2,
-    y = 0
+    y = 0,
+    eyeX = 0,
+    eyeY = 0
 }
 
 canvasPosition = {
@@ -38,14 +40,13 @@ pen = {
 poses = {
     default = {
         texCoords = {
-            "poses/default/uv1.png",
-            "poses/default/uv2.png"
-        },
-        overlays = {
-            "poses/default/overlay.png"
-        },
-        blush = {},
-        pupils = {}
+            "poses/default/uv4.png",
+            "poses/default/uv3.png",
+            "poses/default/uv2.png",
+            "poses/default/uv1.png"},
+        overlays = {"poses/default/overlay.png"},
+        blush = {"poses/default/blush.png"},
+        pupils = {"poses/default/pupils.png"}
     }
 }
 
@@ -115,9 +116,9 @@ function love.load()
         love.graphics.draw(startImage)
 
         love.graphics.setColor(math.random(128,255),math.random(128,255),math.random(128,255))
-        love.graphics.rectangle("fill", 0, 0, 64, 64)
+        love.graphics.rectangle("fill", 0, 0, 64, 56)
         love.graphics.setColor(math.random(128,255),math.random(128,255),math.random(128,255))
-        love.graphics.rectangle("fill", 192, 0, 64, 64)
+        love.graphics.rectangle("fill", 192, 0, 64, 56)
         love.graphics.setColor(255,255,255)
     end)
 
@@ -169,14 +170,14 @@ function love.draw()
         love.graphics.setColor(255,255,255)
 
         -- draw the critter's skin preview
-        -- love.graphics.setShader(hueshiftShader)
-        -- hueshiftShader:send("basis", {
-        --     critter.saturation * math.cos(critter.hueshift),
-        --     critter.saturation * math.sin(critter.hueshift)
-        -- })
-        -- love.graphics.setColor(255, 255, 255)
-        -- love.graphics.draw(skin.front, 128, 0, 0)
-        -- love.graphics.setShader()
+        love.graphics.setShader(hueshiftShader)
+        hueshiftShader:send("basis", {
+            critter.saturation * math.cos(critter.hueshift),
+            critter.saturation * math.sin(critter.hueshift)
+        })
+        love.graphics.setColor(255, 255, 255)
+        love.graphics.draw(skin.front, 384 - 128, 128, 0, 0.5, 0.5)
+        love.graphics.setShader()
 
         -- draw the critter
         love.graphics.setShader(remapShader)
@@ -188,6 +189,9 @@ function love.draw()
                 love.graphics.draw(tc, critter.x, critter.y)
             end
         end)
+        for _,ov in pairs(critter.pupils) do
+            love.graphics.draw(ov, critter.x + critter.eyeX, critter.y + critter.eyeY)
+        end
         love.graphics.setShader(hueshiftShader)
         hueshiftShader:send("basis", {
             critter.saturation * math.cos(critter.hueshift),
@@ -201,9 +205,6 @@ function love.draw()
         love.graphics.setColor(255,255,255)
         for _,ov in pairs(critter.overlays) do
             love.graphics.draw(ov, critter.x, critter.y)
-        end
-        for _,ov in pairs(critter.pupils) do
-            love.graphics.draw(ov, critter.x + critter.eyeX, critter.y + critter.eyeY)
         end
 
         -- aww, it's blushing
@@ -369,7 +370,13 @@ function love.update(dt)
 
         -- get the skin location
         local prevSX, prevSY = pen.skinX, pen.skinY
-        local remapped = {critter.poseMap:getPixel(pen.x, pen.y)}
+        local remapped = {0,0,0.0}
+
+        if (pen.x >= 0) and (pen.x < critter.poseMap:getWidth())
+            and (pen.y >= 0) and (pen.y < critter.poseMap:getHeight()) then
+            remapped = {critter.poseMap:getPixel(pen.x, pen.y)}
+        end
+
         if remapped[3] > 192 then
             -- pen was on the critter, so re-draw in object space
             pen.skinX, pen.skinY = remapped[1], remapped[2]
@@ -407,12 +414,12 @@ function love.update(dt)
         end
 
         critter.itchy = math.max(critter.itchy*(1 - dt), 0)
-        critter.anxiety = math.max(critter.anxiety*(1 - dt), 0)
+        critter.anxiety = math.max(critter.anxiety*math.sqrt(math.max(1 - dt), 0), 0)
     else
         critter.estrus = math.max(critter.estrus*(1 - dt), 0)
         critter.itchy = math.min(critter.itchy + dt, 20)
         if distance > 0 then
-            critter.anxiety = math.min(critter.anxiety + distance, 1000)
+            critter.anxiety = math.min(critter.anxiety + math.sqrt(distance)/5, 1000)
         end
     end
 

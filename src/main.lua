@@ -1,5 +1,7 @@
 patterns = require('patterns')
 
+DEBUG = true
+
 critter = {
     anxiety = 100,  -- pointer movement without being touched
     itchy = 3,      -- not being touched
@@ -20,7 +22,7 @@ canvasPosition = {
 }
 
 pen = {
-    color = {255,255,255,255},
+    color = {127,63,255,255},
     opacity = 255,
     size = 5,
 
@@ -105,7 +107,8 @@ function love.load()
     skin.front:renderTo(function()
         -- set the initial pattern
         local startState = love.image.newImageData(256, 256)
-        startState:mapPixel(patterns.splotchy)
+        local pattern = patterns.choices[math.random(#patterns.choices)]
+        startState:mapPixel(pattern())
         local startImage = love.graphics.newImage(startState)
         love.graphics.draw(startImage)
 
@@ -211,7 +214,14 @@ function love.draw()
 
     blitCanvas(screen)
 
-    love.graphics.print("Current FPS: "..tostring(love.timer.getFPS()), 0, 0)
+    if DEBUG then
+        love.graphics.print("Current FPS: "..tostring(love.timer.getFPS()), 0, 0)
+
+        love.graphics.print(
+            string.format("anxiety: %.1f itchy:%.1f estrus:%.1f",
+                critter.anxiety, critter.itchy, critter.estrus),
+            love.graphics.getWidth()/2, 0)
+    end
 end
 
 function reduceChromatophores(front, back, x, y, w, h)
@@ -237,7 +247,7 @@ function drawThickLine(x0, y0, r0, x1, y1, r1)
 end
 
 function love.update(dt)
-    critter.hueshift = critter.hueshift + critter.estrus*dt
+    critter.hueshift = critter.hueshift + critter.estrus*dt/3
 
     -- jiggle the chromatophores a bit based on critter's anxiety
     if critter.anxiety > 0 then
@@ -283,6 +293,13 @@ function love.update(dt)
     local prevDrawing = pen.drawing
     pen.drawing = false
 
+    local touched = false
+    local prevX, prevY = pen.x, pen.y
+    pen.x, pen.y = mx, my
+    local deltaX = pen.x - prevX
+    local deltaY = pen.y - prevY
+    local distance = math.sqrt(deltaX*deltaX + deltaY*deltaY)
+
     if (mx >= 0) and (mx < 48) and (my >= 0) and (my < 256) then
         -- color picker
         if (love.mouse.isDown(1)) then
@@ -305,12 +322,6 @@ function love.update(dt)
 
         local prevRadius = pen.radius
         pen.radius = pen.size
-
-        local prevX, prevY = pen.x, pen.y
-        pen.x, pen.y = mx, my
-        local deltaX = pen.x - prevX
-        local deltaY = pen.y - prevY
-        local distance = math.sqrt(deltaX*deltaX + deltaY*deltaY)
 
         if prevDrawing then
             pen.radius = pen.radius/math.max(1,distance/4)
@@ -354,9 +365,16 @@ function love.update(dt)
         if remapped[3] > 127 then
             -- pen was on the critter, so re-draw in object space
             pen.skinX, pen.skinY = remapped[1], remapped[2]
+            touched = true
         else
             -- pen wasn't on the critter, so draw in screen space
             pen.skinX, pen.skinY = pen.x - critter.x, pen.y - critter.y
+        end
+
+        -- if the skin position jumped more than 2x the screen position, treat it as discontinuous
+        local dsx, dsy = pen.skinX - prevSX, pen.skinY - prevSY
+        if math.sqrt(dsx*dsx + dsy*dsy) > distance*2 then
+            prevDrawing = false
         end
 
         -- redraw the pen stroke into the skin buffer
@@ -369,6 +387,25 @@ function love.update(dt)
             end
         end)
 
+    end
+
+    -- mouse motions should affect the critter's state
+    if touched then
+        -- let things calm down a tiny tiny bit
+        critter.estrus = math.max(critter.estrus*(1 - dt/3), 0)
+        if distance > 0 then
+            -- as the cursor moves, estrus increases
+            critter.estrus = math.min(critter.estrus + math.sqrt(distance)/256, 5)
+        end
+
+        critter.itchy = math.max(critter.itchy*(1 - dt), 0)
+        critter.anxiety = math.max(critter.anxiety*(1 - dt), 0)
+    else
+        critter.estrus = math.max(critter.estrus*(1 - dt), 0)
+        critter.itchy = math.min(critter.itchy + dt, 20)
+        if distance > 0 then
+            critter.anxiety = math.min(critter.anxiety + distance, 1000)
+        end
     end
 
     -- grab the color from the cursor position (slow, should come last)

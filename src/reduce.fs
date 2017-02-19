@@ -22,14 +22,14 @@ vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) 
     float maxCount = 0;
     vec4 maxColor;
 
-    // TODO: unroll?
+    // TODO: unroll? seems to perform fine, at least on my Mac Pro...
     for (int i = 0; i < 9; i++) {
         vec2 pos = texture_coords + offsets[i].xy/size;
         vec4 here = Texel(texture, pos);
         float weight = offsets[i].z;
 
         int k;
-        for (k = 0; k < allocated; k++) {
+        for (k = 0; k < 9 && k < allocated; k++) {
             if (colors[k] == here) {
                 counts[k] += weight;
                 break;

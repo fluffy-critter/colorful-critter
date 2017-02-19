@@ -1,6 +1,12 @@
 patterns = require('patterns')
 
-critter = {}
+critter = {
+    anxiety = 100,
+    itchy = 3,
+    estrus = 1,
+    saturation = 1,
+    hueshift = 10
+}
 
 canvasPosition = {
     x = 0,
@@ -13,6 +19,7 @@ canvasPosition = {
 
 pen = {
     color = {255,255,255,255},
+    opacity = 255,
     size = 5,
 
     drawing = false,
@@ -48,6 +55,8 @@ function blitCanvas(canvas)
 end
 
 function love.load()
+    math.randomseed(os.time())
+
     screen = love.graphics.newCanvas(384, 256)
     screen:setFilter("nearest", "nearest")
 
@@ -66,63 +75,89 @@ function love.load()
 
     reduceShader = love.graphics.newShader("reduce.fs")
     remapShader = love.graphics.newShader("remap.fs")
+    hueshiftShader = love.graphics.newShader("hueshift.fs")
+
+    critter.canvas = love.graphics.newCanvas(384, 256)
 
     -- initialize the skin
     skin = {}
 
     skin.front = love.graphics.newCanvas(256, 256)
+    skin.front:setFilter("nearest", "nearest")
     skin.back = love.graphics.newCanvas(256, 256)
+    skin.front:setFilter("nearest", "nearest")
 
     skin.front:renderTo(function()
         -- set the initial pattern
         local startState = love.image.newImageData(256, 256)
-        startState:mapPixel(patterns.plaid)
+        startState:mapPixel(patterns.splotchy)
         local startImage = love.graphics.newImage(startState)
         love.graphics.draw(startImage)
 
-        love.graphics.setColor(255,255,127)
+        love.graphics.setColor(math.random(128,255),math.random(128,255),math.random(128,255))
         love.graphics.rectangle("fill", 0, 0, 64, 64)
+        love.graphics.setColor(math.random(128,255),math.random(128,255),math.random(128,255))
         love.graphics.rectangle("fill", 192, 0, 64, 64)
         love.graphics.setColor(255,255,255)
     end)
+
+    -- initialize the jiggler texture
+    skin.jigglerData = love.image.newImageData(256, 256)
+    skin.jigglerImage = love.graphics.newImage(skin.jigglerData)
+    skin.jigglerImage:setFilter("nearest", "nearest")
 end
 
 function love.draw()
-    love.graphics.setCanvas(screen)
-    love.graphics.clear(50,70,90)
+    screen:renderTo(function()
+        love.graphics.setCanvas(screen)
+        love.graphics.clear(50,70,90)
 
-    -- draw the color picker
-    love.graphics.setColor(255, 255, 255)
-    love.graphics.draw(colorPickerImage, 0, 0)
+        -- draw the color picker
+        love.graphics.setColor(255, 255, 255)
+        love.graphics.draw(colorPickerImage, 0, 0)
 
-    love.graphics.setColor(0,0,0)
-    love.graphics.rectangle("fill", colorPicker:getWidth(), 0, 32, 32)
-    love.graphics.setColor(unpack(pen.color))
-    love.graphics.ellipse("fill", colorPicker:getWidth() + 16, 16, pen.size, pen.size)
-    love.graphics.setColor(255,255,255)
+        love.graphics.setColor(0,0,0)
+        love.graphics.rectangle("fill", colorPicker:getWidth(), 0, 32, 32)
+        love.graphics.setColor(unpack(pen.color))
+        love.graphics.ellipse("fill", colorPicker:getWidth() + 16, 16, pen.size, pen.size)
+        love.graphics.setColor(255,255,255)
 
-    -- draw the critter's skin preview
-    -- love.graphics.setColor(255, 255, 255)
-    -- love.graphics.draw(skin.front, 128, 0, 0)
+        -- draw the critter's skin preview
+        love.graphics.setShader(hueshiftShader)
+        hueshiftShader:send("basis", {
+            critter.saturation * math.cos(critter.hueshift),
+            critter.saturation * math.sin(critter.hueshift)
+        })
+        love.graphics.setColor(255, 255, 255)
+        love.graphics.draw(skin.front, 128, 0, 0)
+        love.graphics.setShader()
 
-    -- draw the critter
-    love.graphics.setBlendMode("alpha", "premultiplied")
-    love.graphics.setShader(remapShader)
-    remapShader:send("referred", skin.front)
-    for _,tc in pairs(critter.texCoords) do
-        love.graphics.draw(tc, 128, 0)
-    end
-    love.graphics.setBlendMode("alpha", "alphamultiply")
-    love.graphics.setShader()
-    for _,ov in pairs(critter.overlays) do
-        love.graphics.draw(ov, 128, 0)
-    end
+        -- draw the critter
+        critter.canvas:renderTo(function()
+            love.graphics.setBlendMode("alpha", "premultiplied")
+            love.graphics.setShader(remapShader)
+            remapShader:send("referred", skin.front)
+            for _,tc in pairs(critter.texCoords) do
+                love.graphics.draw(tc, 128, 0)
+            end
+            love.graphics.setBlendMode("alpha", "alphamultiply")
+            love.graphics.setShader()
+            for _,ov in pairs(critter.overlays) do
+                love.graphics.draw(ov, 128, 0)
+            end
+        end)
+        love.graphics.setShader(hueshiftShader)
+        hueshiftShader:send("basis", {
+            critter.saturation * math.cos(critter.hueshift),
+            critter.saturation * math.sin(critter.hueshift)
+        })
+        love.graphics.draw(critter.canvas)
+        love.graphics.setShader()
 
-    -- draw the paint overlay
-    love.graphics.draw(paintOverlay)
+        -- draw the paint overlay
+        love.graphics.draw(paintOverlay)
+    end)
 
-    -- blit the screen
-    love.graphics.setCanvas()
     blitCanvas(screen)
 
     love.graphics.print("Current FPS: "..tostring(love.timer.getFPS()), 0, 0)
@@ -138,6 +173,36 @@ function reduceChromatophores(front, back, x, y, w, h)
 end
 
 function love.update(dt)
+    critter.hueshift = critter.hueshift + critter.estrus*dt
+
+    -- jiggle the chromatophores a bit based on critter's anxiety
+    if critter.anxiety > 0 then
+        skin.jigglerData:mapPixel(function(x,y,r,g,b,a)
+            return x,y,255,255
+        end)
+        for i=0,critter.anxiety do
+            local sx = math.random(0,255)
+            local sy = math.random(0,255)
+            local dx = (sx + math.random(-critter.itchy,critter.itchy))%256
+            local dy = (sy + math.random(-critter.itchy,critter.itchy))%256
+
+            local sp = {skin.jigglerData:getPixel(sx, sy)}
+            local dp = {skin.jigglerData:getPixel(dx, dy)}
+            skin.jigglerData:setPixel(sx, sy, unpack(dp))
+            skin.jigglerData:setPixel(dx, dy, unpack(sp))
+        end
+        skin.jigglerImage:refresh()
+
+        skin.back:renderTo(function()
+            love.graphics.setShader(remapShader)
+            remapShader:send("referred", skin.front)
+            love.graphics.setColor(255,255,255)
+            love.graphics.draw(skin.jigglerImage)
+            love.graphics.setShader()
+        end)
+        skin.front,skin.back = skin.back,skin.front
+    end
+
     -- reduce front buffer into backbuffer
     reduceChromatophores(skin.front, skin.back, 0, 0, 256, 256)
     skin.front,skin.back = skin.back,skin.front
@@ -158,6 +223,7 @@ function love.update(dt)
         -- color picker
         if (love.mouse.isDown(1)) then
             pen.color = {colorPicker:getPixel(mx, my)}
+            pen.color[4] = pen.opacity
         end
     elseif (mx >= 48) and (mx < 48 + 32) and (my >= 0) and (my < 32) then
         -- size adjust
@@ -165,6 +231,9 @@ function love.update(dt)
             local x = mx - 48 - 16
             local y = my - 16
             pen.size = math.min(16, math.sqrt(x*x + y*y))
+            -- pen.size = x/2
+            -- pen.opacity = 255 - y*255/32
+            -- pen.color[4] = pen.opacity
         end
     elseif love.mouse.isDown(1) then
         -- paint strokes
@@ -204,8 +273,14 @@ function love.update(dt)
 
         -- and also copy that into the texture
         skin.front:renderTo(function()
+            love.graphics.setShader(hueshiftShader)
+            hueshiftShader:send("basis", {
+                math.cos(-critter.hueshift),
+                math.sin(-critter.hueshift)
+            })
             love.graphics.setColor(255,255,255)
             love.graphics.draw(paintOverlay, 256-384, 0)
+            love.graphics.setShader()
         end)
     end
 
@@ -213,5 +288,6 @@ function love.update(dt)
     if love.mouse.isDown(2) then
         local foo = screen:newImageData()
         pen.color = {foo:getPixel(mx, my)}
+        pen.color[4] = pen.opacity
     end
 end

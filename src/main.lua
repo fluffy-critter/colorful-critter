@@ -3,7 +3,7 @@ patterns = require('patterns')
 DEBUG = true
 
 critter = {
-    anxiety = 100,  -- pointer movement without being touched
+    anxiety = 10,   -- pointer movement without being touched
     itchy = 3,      -- not being touched
     estrus = 0,     -- pointer movement while being touched
     saturation = 1,
@@ -43,7 +43,8 @@ poses = {
             "poses/default/uv4.png",
             "poses/default/uv3.png",
             "poses/default/uv2.png",
-            "poses/default/uv1.png"},
+            "poses/default/uv1.png"
+            },
         overlays = {"poses/default/overlay.png"},
         blush = {"poses/default/blush.png"},
         pupils = {"poses/default/pupils.png"}
@@ -111,6 +112,7 @@ function love.load()
         -- set the initial pattern
         local startState = love.image.newImageData(256, 256)
         local pattern = patterns.choices[math.random(#patterns.choices)]
+        -- local pattern = patterns.stripey
         startState:mapPixel(pattern())
         local startImage = love.graphics.newImage(startState)
         love.graphics.draw(startImage)

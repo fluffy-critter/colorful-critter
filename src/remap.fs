@@ -10,5 +10,5 @@ vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) 
 
     return color
         * here.a
-        * vec4(there.rgb * here.b, there.a);
+        * vec4(there.rgb * here.b, 1)*there.a;
 }

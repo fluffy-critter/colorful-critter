@@ -3,9 +3,9 @@ patterns = require('patterns')
 critter = {
     anxiety = 100,
     itchy = 3,
-    estrus = 1,
+    estrus = 0,
     saturation = 1,
-    hueshift = 10
+    hueshift = 0
 }
 
 canvasPosition = {
@@ -123,14 +123,14 @@ function love.draw()
         love.graphics.setColor(255,255,255)
 
         -- draw the critter's skin preview
-        love.graphics.setShader(hueshiftShader)
-        hueshiftShader:send("basis", {
-            critter.saturation * math.cos(critter.hueshift),
-            critter.saturation * math.sin(critter.hueshift)
-        })
-        love.graphics.setColor(255, 255, 255)
-        love.graphics.draw(skin.front, 128, 0, 0)
-        love.graphics.setShader()
+        -- love.graphics.setShader(hueshiftShader)
+        -- hueshiftShader:send("basis", {
+        --     critter.saturation * math.cos(critter.hueshift),
+        --     critter.saturation * math.sin(critter.hueshift)
+        -- })
+        -- love.graphics.setColor(255, 255, 255)
+        -- love.graphics.draw(skin.front, 128, 0, 0)
+        -- love.graphics.setShader()
 
         -- draw the critter
         critter.canvas:renderTo(function()

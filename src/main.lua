@@ -1,11 +1,13 @@
 patterns = require('patterns')
 
 critter = {
-    anxiety = 100,
-    itchy = 3,
-    estrus = 0,
+    anxiety = 100,  -- pointer movement without being touched
+    itchy = 3,      -- not being touched
+    estrus = 0,     -- pointer movement while being touched
     saturation = 1,
-    hueshift = 0
+    hueshift = 0,
+    x = (384 - 256)/2,
+    y = 0
 }
 
 canvasPosition = {
@@ -26,6 +28,19 @@ pen = {
     x = 0,
     y = 0,
     radius = 5
+}
+
+poses = {
+    default = {
+        texCoords = {
+            "poses/default/uv1.png",
+            "poses/default/uv2.png"
+        },
+        overlays = {
+            "poses/default/overlay.png"
+        },
+        blush = {}
+    }
 }
 
 function blitCanvas(canvas)
@@ -65,19 +80,16 @@ function love.load()
     colorPicker = love.image.newImageData("assets/gradient.png")
     colorPickerImage = love.graphics.newImage(colorPicker)
 
-    critter.texCoords = {
-        love.graphics.newImage("assets/critter-uv1.png"),
-        love.graphics.newImage("assets/critter-uv2.png")
-    }
-    critter.overlays = {
-        love.graphics.newImage("assets/critter-overlay.png")
-    }
+    critter.texCoords = {}
+    critter.overlays = {}
+    critter.blush = {}
 
     reduceShader = love.graphics.newShader("reduce.fs")
     remapShader = love.graphics.newShader("remap.fs")
     hueshiftShader = love.graphics.newShader("hueshift.fs")
 
     critter.canvas = love.graphics.newCanvas(384, 256)
+    critter.pose = love.graphics.newCanvas(384, 256)
 
     -- initialize the skin
     skin = {}
@@ -105,6 +117,29 @@ function love.load()
     skin.jigglerData = love.image.newImageData(256, 256)
     skin.jigglerImage = love.graphics.newImage(skin.jigglerData)
     skin.jigglerImage:setFilter("nearest", "nearest")
+
+    setPose(poses.default)
+end
+
+function setPose(pose)
+    local texCoords = {}
+    for idx,path in pairs(pose.texCoords) do
+        texCoords[idx] = love.graphics.newImage("assets/" .. path)
+    end
+
+    local overlays = {}
+    for idx,path in pairs(pose.overlays) do
+        overlays[idx] = love.graphics.newImage("assets/" .. path)
+    end
+
+    local blush = {}
+    for idx,path in pairs(pose.blush) do
+        blush[idx] = love.graphics.newImage("assets/" .. path)
+    end
+
+    critter.texCoords = texCoords
+    critter.overlays = overlays
+    critter.blush = blush
 end
 
 function love.draw()
@@ -139,14 +174,7 @@ function love.draw()
             love.graphics.setShader(remapShader)
             remapShader:send("referred", skin.front)
             for _,tc in pairs(critter.texCoords) do
-                love.graphics.draw(tc, 128, 0)
-            end
-
-            -- overlay layers
-            love.graphics.setBlendMode("alpha", "alphamultiply")
-            love.graphics.setShader()
-            for _,ov in pairs(critter.overlays) do
-                love.graphics.draw(ov, 128, 0)
+                love.graphics.draw(tc, critter.x, critter.y)
             end
         end)
         love.graphics.setShader(hueshiftShader)
@@ -156,6 +184,13 @@ function love.draw()
         })
         love.graphics.draw(critter.canvas)
         love.graphics.setShader()
+
+        -- overlay layers
+        love.graphics.setBlendMode("alpha", "alphamultiply")
+        love.graphics.setShader()
+        for _,ov in pairs(critter.overlays) do
+            love.graphics.draw(ov, critter.x, critter.y)
+        end
 
         -- draw the paint overlay
         love.graphics.draw(paintOverlay)

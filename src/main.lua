@@ -44,7 +44,8 @@ poses = {
         overlays = {
             "poses/default/overlay.png"
         },
-        blush = {}
+        blush = {},
+        pupils = {}
     }
 }
 
@@ -88,6 +89,7 @@ function love.load()
     critter.texCoords = {}
     critter.overlays = {}
     critter.blush = {}
+    critter.pupils = {}
 
     reduceShader = love.graphics.newShader("reduce.fs")
     remapShader = love.graphics.newShader("remap.fs")
@@ -128,24 +130,17 @@ function love.load()
 end
 
 function setPose(pose)
-    local texCoords = {}
-    for idx,path in pairs(pose.texCoords) do
-        texCoords[idx] = love.graphics.newImage("assets/" .. path)
+    function loadAssets(tbl)
+        local out = {}
+        for idx,path in pairs(tbl) do
+            out[idx] = love.graphics.newImage("assets/" .. path)
+        end
+        return out
     end
 
-    local overlays = {}
-    for idx,path in pairs(pose.overlays) do
-        overlays[idx] = love.graphics.newImage("assets/" .. path)
+    for layer,props in pairs(pose) do
+        critter[layer] = loadAssets(props)
     end
-
-    local blush = {}
-    for idx,path in pairs(pose.blush) do
-        blush[idx] = love.graphics.newImage("assets/" .. path)
-    end
-
-    critter.texCoords = texCoords
-    critter.overlays = overlays
-    critter.blush = blush
 
     -- draw the UV map
     critter.pose:renderTo(function()
@@ -184,11 +179,11 @@ function love.draw()
         -- love.graphics.setShader()
 
         -- draw the critter
+        love.graphics.setShader(remapShader)
+        remapShader:send("referred", skin.front)
         critter.canvas:renderTo(function()
             -- skin layers
             love.graphics.setBlendMode("alpha", "premultiplied")
-            love.graphics.setShader(remapShader)
-            remapShader:send("referred", skin.front)
             for _,tc in pairs(critter.texCoords) do
                 love.graphics.draw(tc, critter.x, critter.y)
             end
@@ -203,10 +198,23 @@ function love.draw()
 
         -- overlay layers
         love.graphics.setBlendMode("alpha", "alphamultiply")
-        love.graphics.setShader()
+        love.graphics.setColor(255,255,255)
         for _,ov in pairs(critter.overlays) do
             love.graphics.draw(ov, critter.x, critter.y)
         end
+        for _,ov in pairs(critter.pupils) do
+            love.graphics.draw(ov, critter.x + critter.eyeX, critter.y + critter.eyeY)
+        end
+
+        -- aww, it's blushing
+        love.graphics.setColor(math.min(255, 255*critter.estrus),
+            math.min(63, 31*critter.estrus),
+            math.min(127, 31*critter.estrus),
+            math.min(255, 255*math.sqrt(critter.estrus)))
+        for _,ov in pairs(critter.blush) do
+            love.graphics.draw(ov, critter.x + critter.eyeX, critter.y + critter.eyeY)
+        end
+        love.graphics.setColor(255,255,255)
 
         -- draw the paint overlay
         love.graphics.draw(paintOverlay)

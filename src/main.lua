@@ -27,7 +27,10 @@ pen = {
     drawing = false,
     x = 0,
     y = 0,
-    radius = 5
+    radius = 5,
+
+    skinX = 0,
+    skinY = 0
 }
 
 poses = {
@@ -140,6 +143,16 @@ function setPose(pose)
     critter.texCoords = texCoords
     critter.overlays = overlays
     critter.blush = blush
+
+    -- draw the UV map
+    critter.pose:renderTo(function()
+        love.graphics.clear(0,0,0,0)
+        love.graphics.setBlendMode("alpha", "alphamultiply")
+        for _,tc in pairs(critter.texCoords) do
+            love.graphics.draw(tc, critter.x, critter.y)
+        end
+    end)
+    critter.poseMap = critter.pose:newImageData()
 end
 
 function love.draw()
@@ -208,6 +221,19 @@ function reduceChromatophores(front, back, x, y, w, h)
         love.graphics.draw(front)
         love.graphics.setShader()
     end)
+end
+
+function drawThickLine(x0, y0, r0, x1, y1, r1)
+    local deltaX = x1 - x0
+    local deltaY = y1 - y0
+    local distance = math.sqrt(deltaX*deltaX + deltaY*deltaY)
+    local px, py = deltaY/distance, -deltaX/distance
+    love.graphics.polygon("fill",
+        x0 + px*r0, y0 + py*r0,
+        x0 - px*r0, y0 - py*r0,
+        x1 - px*r1, y1 - py*r1,
+        x1 + px*r1, y1 + py*r1
+        )
 end
 
 function love.update(dt)
@@ -294,32 +320,55 @@ function love.update(dt)
         paintOverlay:renderTo(function()
             love.graphics.setColor(unpack(pen.color))
 
-            -- draw endcap
             love.graphics.ellipse("fill", pen.x, pen.y, pen.radius, pen.radius)
-
-            -- draw stroke
             if prevDrawing then
-                local px, py = deltaY/distance, -deltaX/distance
-                love.graphics.polygon("fill",
-                    prevX + px*prevRadius, prevY + py*prevRadius,
-                    prevX - px*prevRadius, prevY - py*prevRadius,
-                    pen.x - px*pen.radius, pen.y - py*pen.radius,
-                    pen.x + px*pen.radius, pen.y + py*pen.radius
-                    )
+                drawThickLine(pen.x, pen.y, pen.radius, prevX, prevY, prevRadius)
             end
         end)
 
-        -- and also copy that into the texture
+        -- unshift the color for the painting
+        local rotU = math.cos(-critter.hueshift)
+        local rotV = math.sin(-critter.hueshift)
+        local unshiftColor = {
+            (
+                  (.299+.701*rotU+.168*rotV)*pen.color[1]
+                + (.587-.587*rotU+.330*rotV)*pen.color[2]
+                + (.114-.114*rotU-.497*rotV)*pen.color[3]
+            ),
+            (
+                  (.299-.299*rotU-.328*rotV)*pen.color[1]
+                + (.587+.413*rotU+.035*rotV)*pen.color[2]
+                + (.114-.114*rotU+.292*rotV)*pen.color[3]
+            ),
+            (
+                  (.299-.300*rotU+1.25*rotV)*pen.color[1]
+                + (.587-.588*rotU-1.05*rotV)*pen.color[2]
+                + (.114+.886*rotU-.203*rotV)*pen.color[3]
+            ),
+            pen.opacity
+        }
+
+        -- get the skin location
+        local prevSX, prevSY = pen.skinX, pen.skinY
+        local remapped = {critter.poseMap:getPixel(pen.x, pen.y)}
+        if remapped[3] > 127 then
+            -- pen was on the critter, so re-draw in object space
+            pen.skinX, pen.skinY = remapped[1], remapped[2]
+        else
+            -- pen wasn't on the critter, so draw in screen space
+            pen.skinX, pen.skinY = pen.x - critter.x, pen.y - critter.y
+        end
+
+        -- redraw the pen stroke into the skin buffer
         skin.front:renderTo(function()
-            love.graphics.setShader(hueshiftShader)
-            hueshiftShader:send("basis", {
-                math.cos(-critter.hueshift),
-                math.sin(-critter.hueshift)
-            })
-            love.graphics.setColor(255,255,255)
-            love.graphics.draw(paintOverlay, 256-384, 0)
-            love.graphics.setShader()
+            love.graphics.setColor(unpack(unshiftColor))
+
+            love.graphics.ellipse("fill", pen.skinX, pen.skinY, pen.radius, pen.radius)
+            if prevDrawing then
+                drawThickLine(pen.skinX, pen.skinY, pen.radius, prevSX, prevSY, prevRadius)
+            end
         end)
+
     end
 
     -- grab the color from the cursor position (slow, should come last)

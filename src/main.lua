@@ -134,12 +134,15 @@ function love.draw()
 
         -- draw the critter
         critter.canvas:renderTo(function()
+            -- skin layers
             love.graphics.setBlendMode("alpha", "premultiplied")
             love.graphics.setShader(remapShader)
             remapShader:send("referred", skin.front)
             for _,tc in pairs(critter.texCoords) do
                 love.graphics.draw(tc, 128, 0)
             end
+
+            -- overlay layers
             love.graphics.setBlendMode("alpha", "alphamultiply")
             love.graphics.setShader()
             for _,ov in pairs(critter.overlays) do

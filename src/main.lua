@@ -155,7 +155,7 @@ function setPose(pose)
     -- draw the UV map
     critter.pose:renderTo(function()
         love.graphics.setShader(thresholdShader)
-        thresholdShader:send("threshold", 0.75)
+        thresholdShader:send("threshold", 0.5)
         love.graphics.clear(0,0,0,0)
         love.graphics.setColor(255,255,255)
         love.graphics.setBlendMode("alpha", "alphamultiply")
@@ -199,6 +199,8 @@ function love.draw()
         love.graphics.setColor(255, 255, 255)
         love.graphics.draw(skin.front, 384 - 128, 128, 0, 0.5, 0.5)
         love.graphics.setShader()
+
+        love.graphics.draw(critter.pose, 384 - 128, 0, 0, 0.5, 0.5)
 
         -- draw the critter
         critter.canvas:renderTo(function()
@@ -413,7 +415,7 @@ function love.update(dt)
             remapped = {critter.poseMap:getPixel(pen.x, pen.y)}
         end
 
-        if remapped[3] > 192 then
+        if remapped[4] > 192 then
             -- pen was on the critter, so re-draw in object space
             pen.skinX, pen.skinY = remapped[1], remapped[2]
             touched = true

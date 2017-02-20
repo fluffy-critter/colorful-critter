@@ -1,4 +1,6 @@
 patterns = require('patterns')
+states = require('states')
+poses = require('poses')
 
 DEBUG = true
 
@@ -8,10 +10,34 @@ critter = {
     estrus = 0,     -- pointer movement while being touched
     saturation = 1,
     hueshift = 0,
+
+    -- render position of the critter
     x = (384 - 256)/2,
     y = 0,
+
+    -- current look-position of the eyes
     eyeX = 0,
-    eyeY = 0
+    eyeY = 0,
+
+    state = "default",
+
+    setPattern = function()
+         skin.front:renderTo(function()
+            -- set the initial pattern
+            local startState = love.image.newImageData(256, 256)
+            local pattern = patterns.choices[math.random(#patterns.choices)]
+            -- local pattern = patterns.stripey
+            startState:mapPixel(pattern())
+            local startImage = love.graphics.newImage(startState)
+            love.graphics.draw(startImage)
+
+            love.graphics.setColor(math.random(128,255),math.random(128,255),math.random(128,255))
+            love.graphics.rectangle("fill", 0, 0, 64, 56)
+            love.graphics.setColor(math.random(128,255),math.random(128,255),math.random(128,255))
+            love.graphics.rectangle("fill", 192, 0, 64, 56)
+            love.graphics.setColor(255,255,255)
+        end)
+    end
 }
 
 canvasPosition = {
@@ -35,20 +61,6 @@ pen = {
 
     skinX = 0,
     skinY = 0
-}
-
-poses = {
-    default = {
-        texCoords = {
-            "poses/default/uv4.png",
-            "poses/default/uv3.png",
-            "poses/default/uv2.png",
-            "poses/default/uv1.png"
-            },
-        overlays = {"poses/default/overlay.png"},
-        blush = {"poses/default/blush.png"},
-        pupils = {"poses/default/pupils.png"}
-    }
 }
 
 function blitCanvas(canvas)
@@ -108,21 +120,7 @@ function love.load()
     skin.back = love.graphics.newCanvas(256, 256)
     skin.front:setFilter("nearest", "nearest")
 
-    skin.front:renderTo(function()
-        -- set the initial pattern
-        local startState = love.image.newImageData(256, 256)
-        local pattern = patterns.choices[math.random(#patterns.choices)]
-        -- local pattern = patterns.stripey
-        startState:mapPixel(pattern())
-        local startImage = love.graphics.newImage(startState)
-        love.graphics.draw(startImage)
-
-        love.graphics.setColor(math.random(128,255),math.random(128,255),math.random(128,255))
-        love.graphics.rectangle("fill", 0, 0, 64, 56)
-        love.graphics.setColor(math.random(128,255),math.random(128,255),math.random(128,255))
-        love.graphics.rectangle("fill", 192, 0, 64, 56)
-        love.graphics.setColor(255,255,255)
-    end)
+    critter.setPattern()
 
     -- initialize the jiggler texture
     skin.jigglerData = love.image.newImageData(256, 256)
@@ -141,13 +139,18 @@ function setPose(pose)
         return out
     end
 
-    for layer,props in pairs(pose) do
-        critter[layer] = loadAssets(props)
+    for k,v in pairs(pose) do
+        if type(v) == "table" then
+            critter[k] = loadAssets(v)
+        else
+            critter[k] = v
+        end
     end
 
     -- draw the UV map
     critter.pose:renderTo(function()
         love.graphics.clear(0,0,0,0)
+        love.graphics.setColor(255,255,255)
         love.graphics.setBlendMode("alpha", "alphamultiply")
         for _,tc in pairs(critter.texCoords) do
             love.graphics.draw(tc, critter.x, critter.y)
@@ -191,9 +194,6 @@ function love.draw()
                 love.graphics.draw(tc, critter.x, critter.y)
             end
         end)
-        for _,ov in pairs(critter.pupils) do
-            love.graphics.draw(ov, critter.x + critter.eyeX, critter.y + critter.eyeY)
-        end
         love.graphics.setShader(hueshiftShader)
         hueshiftShader:send("basis", {
             critter.saturation * math.cos(critter.hueshift),
@@ -208,6 +208,9 @@ function love.draw()
         for _,ov in pairs(critter.overlays) do
             love.graphics.draw(ov, critter.x, critter.y)
         end
+        for _,ov in pairs(critter.pupils) do
+            love.graphics.draw(ov, critter.x + critter.eyeX, critter.y + critter.eyeY)
+        end
 
         -- aww, it's blushing
         love.graphics.setColor(math.min(255, 255*critter.estrus),
@@ -215,7 +218,7 @@ function love.draw()
             math.min(127, 31*critter.estrus),
             math.min(255, 255*math.sqrt(critter.estrus)))
         for _,ov in pairs(critter.blush) do
-            love.graphics.draw(ov, critter.x + critter.eyeX, critter.y + critter.eyeY)
+            love.graphics.draw(ov, critter.x, critter.y)
         end
         love.graphics.setColor(255,255,255)
 
@@ -229,7 +232,8 @@ function love.draw()
         love.graphics.print("Current FPS: "..tostring(love.timer.getFPS()), 0, 0)
 
         love.graphics.print(
-            string.format("anxiety: %.1f itchy:%.1f estrus:%.1f",
+            string.format("state: %s anxiety: %.1f itchy:%.1f estrus:%.1f",
+                critter.state,
                 critter.anxiety, critter.itchy, critter.estrus),
             love.graphics.getWidth()/2, 0)
     end
@@ -311,6 +315,15 @@ function love.update(dt)
     local deltaY = pen.y - prevY
     local distance = math.sqrt(deltaX*deltaX + deltaY*deltaY)
 
+    critter.eyeX = (mx - (critter.x + critter.eyeCX))/20
+    critter.eyeY = (my - (critter.y + critter.eyeCY))/20
+    local eyeD = math.sqrt(critter.eyeX*critter.eyeX + critter.eyeY*critter.eyeY)
+    if eyeD > 3 then
+        critter.eyeX = critter.eyeX*3 / eyeD
+        critter.eyeY = critter.eyeY*3 / eyeD
+    end
+    critter.eyeY = math.min(2, critter.eyeY)
+
     if (mx >= 0) and (mx < 48) and (my >= 0) and (my < 256) then
         -- color picker
         if (love.mouse.isDown(1)) then
@@ -385,7 +398,7 @@ function love.update(dt)
             touched = true
         else
             -- pen wasn't on the critter, so draw in screen space
-            pen.skinX, pen.skinY = pen.x - critter.x, pen.y - critter.y
+            pen.skinX, pen.skinY = pen.x - 128, pen.y
         end
 
         -- if the skin position jumped more than 2x the screen position, treat it as discontinuous
@@ -409,19 +422,21 @@ function love.update(dt)
     -- mouse motions should affect the critter's state
     if touched then
         -- let things calm down a tiny tiny bit
-        critter.estrus = math.max(critter.estrus*(1 - dt/3), 0)
+        critter.estrus = math.max(critter.estrus*(1 - dt/10), 0)
         if distance > 0 then
             -- as the cursor moves, estrus increases
-            critter.estrus = math.min(critter.estrus + math.sqrt(distance)/256, 5)
+            critter.estrus = math.min(critter.estrus + math.sqrt(distance)/1000, 5)
         end
 
         critter.itchy = math.max(critter.itchy*(1 - dt), 0)
         critter.anxiety = math.max(critter.anxiety*math.sqrt(math.max(1 - dt), 0), 0)
     else
-        critter.estrus = math.max(critter.estrus*(1 - dt), 0)
+        critter.estrus = math.max(critter.estrus*(1 - dt/6), 0)
         critter.itchy = math.min(critter.itchy + dt, 20)
         if distance > 0 then
             critter.anxiety = math.min(critter.anxiety + math.sqrt(distance)/5, 1000)
+        else
+            critter.anxiety = math.max(critter.anxiety*(1 - dt/10), 0)
         end
     end
 
@@ -430,5 +445,38 @@ function love.update(dt)
         local foo = screen:newImageData()
         pen.color = {foo:getPixel(mx, my)}
         pen.color[4] = pen.opacity
+    end
+
+    -- finally, evaluate the state transitions
+    local curState = states[critter.state]
+    local nextState
+    local nextPose
+    local seenStates = {}
+    repeat
+        nextState = curState.nextState(critter)
+
+        if nextState then
+            -- detect logic cycles
+            if seenStates[nextState] then
+                error("state cycle")
+            end
+            seenStates[nextState] = true
+
+            print("nextState = "..nextState)
+            critter.state = nextState
+            curState = states[nextState]
+            if curState.pose then
+                nextPose = curState.pose
+            end
+        end
+    until not nextState
+
+    if nextPose then
+        print("nextPose=" .. nextPose)
+        setPose(poses[nextPose])
+    end
+
+    if curState.onEnterState then
+        curState.onEnterState(critter)
     end
 end

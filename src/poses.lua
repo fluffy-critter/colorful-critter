@@ -12,6 +12,19 @@ local poses = {
         blush = {"poses/default/blush.png"},
         pupils = {"poses/default/pupils.png"}
     },
+    anxious = {
+        eyeCX = 500/4,
+        eyeCY = 172/4,
+        texCoords = {
+            "poses/anxious/uv4.png",
+            "poses/anxious/uv3.png",
+            "poses/anxious/uv2.png",
+            "poses/anxious/uv1.png"
+            },
+        overlays = {"poses/anxious/overlay.png"},
+        blush = {"poses/anxious/blush.png"},
+        pupils = {"poses/anxious/pupils.png"}
+    },
     frustrated = {
         texCoords = {
             "poses/frustrated/uv4.png",

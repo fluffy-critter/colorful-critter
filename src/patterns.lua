@@ -30,9 +30,13 @@ end
 function plaid()
     local r0, g0, b0 = HSV(math.random(0, 255), 255, math.random(63, 255))
     local r1, g1, b1 = HSV(math.random(0, 255), 255, math.random(63, 255))
+    local size = math.random(16,64)
 
     return function(x,y,r,g,b,a)
-        local mix = (math.floor((x+y)/32)%2 + math.floor((y-x)/32)%2)*0.5
+        local i = x - 128
+        local j = y - 128
+        local mix = (math.floor((i+j)/size)%2
+            + math.floor((j-i)/size)%2)*0.5
         return lerp(r0, r1, mix), lerp(g0, g1, mix), lerp(b0, b1, mix), 255
     end
 end

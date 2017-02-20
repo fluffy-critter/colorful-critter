@@ -482,4 +482,18 @@ function love.update(dt)
     if curState.onEnterState then
         curState.onEnterState(critter)
     end
+
+    if DEBUG then
+        if love.keyboard.isDown("q") then
+            setPose(poses.default)
+        elseif love.keyboard.isDown("w") then
+            setPose(poses.anxious)
+        elseif love.keyboard.isDown("e") then
+            setPose(poses.frustrated)
+        end
+
+        if love.keyboard.isDown("0") then
+            critter.setPattern()
+        end
+    end
 end

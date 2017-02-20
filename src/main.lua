@@ -415,7 +415,7 @@ function love.update(dt)
             touched = true
         else
             -- pen wasn't on the critter, so draw in screen space
-            pen.skinX, pen.skinY = pen.x - 128, pen.y
+            pen.skinX, pen.skinY = pen.x - critter.x, pen.y - critter.y
         end
 
         -- if the skin position jumped more than 2x the screen position, treat it as discontinuous

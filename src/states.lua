@@ -48,6 +48,7 @@ local states = {
     },
 
     anxious = {
+        pose = "anxious",
         nextState = (function(c)
             if c.anxiety < 80 and c.estrus <= 1.0 then
                 return "default"
@@ -80,7 +81,7 @@ local states = {
     },
 
     hyperorgasm = {
-        nextstate = (function(c)
+        nextState = (function(c)
             if c.estrus < 1.0 then
                 return "refractory"
             end
@@ -110,7 +111,7 @@ local states = {
 
     refractory = {
         nextState = (function(c)
-            if c.anxiety > 50 or c.itchy > 10 then
+            if c.anxiety > 100 or c.itchy > 18 then
                 return "squirm"
             elseif c.estrus < 0.3 then
                 return "resetting"
@@ -119,11 +120,9 @@ local states = {
     },
 
     resetting = {
-        onEnterState = (function(c)
-            c.setPattern()
-        end),
         nextState = (function(c)
-            if c.estrus < 0.1 then
+            c.setPattern()
+            if c.estrus < 0.29 then
                 return "relaxed"
             end
         end)

@@ -169,9 +169,9 @@ function love.draw()
         love.graphics.draw(colorPickerImage, 0, 0)
 
         love.graphics.setColor(0,0,0)
-        love.graphics.rectangle("fill", colorPicker:getWidth(), 0, 32, 32)
+        love.graphics.rectangle("fill", colorPicker:getWidth(), 0, 64, 64)
         love.graphics.setColor(unpack(pen.color))
-        love.graphics.ellipse("fill", colorPicker:getWidth() + 16, 16, pen.size, pen.size)
+        love.graphics.ellipse("fill", colorPicker:getWidth() + 32, 32, pen.size, pen.size)
         love.graphics.setColor(255,255,255)
 
         -- draw the critter's skin preview
@@ -229,6 +229,8 @@ function love.draw()
         love.graphics.draw(paintOverlay)
     end)
 
+    love.graphics.setBlendMode("alpha", "alphamultiply")
+
     blitCanvas(screen)
 
     if DEBUG then
@@ -275,8 +277,8 @@ function love.update(dt)
         for i=0,critter.anxiety do
             local sx = math.random(0,255)
             local sy = math.random(0,255)
-            local dx = (sx + math.random(-critter.itchy,critter.itchy))%256
-            local dy = (sy + math.random(-critter.itchy,critter.itchy))%256
+            local dx = math.floor(sx + math.random(-critter.itchy,critter.itchy))%256
+            local dy = math.floor(sy + math.random(-critter.itchy,critter.itchy))%256
 
             local sp = {skin.jigglerData:getPixel(sx, sy)}
             local dp = {skin.jigglerData:getPixel(dx, dy)}
@@ -333,12 +335,12 @@ function love.update(dt)
             pen.color = {colorPicker:getPixel(mx, my)}
             pen.color[4] = pen.opacity
         end
-    elseif (mx >= 48) and (mx < 48 + 32) and (my >= 0) and (my < 32) then
+    elseif (mx >= 48) and (mx < 48 + 64) and (my >= 0) and (my < 64) then
         -- size adjust
         if love.mouse.isDown(1) then
-            local x = mx - 48 - 16
-            local y = my - 16
-            pen.size = math.min(16, math.sqrt(x*x + y*y))
+            local x = mx - 48 - 32
+            local y = my - 32
+            pen.size = math.min(32, math.sqrt(x*x + y*y))
             -- pen.size = x/2
             -- pen.opacity = 255 - y*255/32
             -- pen.color[4] = pen.opacity
@@ -426,20 +428,18 @@ function love.update(dt)
     if touched then
         -- let things calm down a tiny tiny bit
         critter.estrus = math.max(critter.estrus*(1 - dt/10), 0)
-        if distance > 0 then
-            -- as the cursor moves, estrus increases
-            critter.estrus = math.min(critter.estrus + math.sqrt(distance)/1000, 5)
-        end
+        -- as the cursor moves, estrus increases
+        critter.estrus = math.min(critter.estrus + math.sqrt(distance + 1)/500, 5)
 
         critter.itchy = math.max(critter.itchy*(1 - dt), 0)
         critter.anxiety = math.max(critter.anxiety*math.sqrt(math.max(1 - dt), 0), 0)
     else
-        critter.estrus = math.max(critter.estrus*(1 - dt/6), 0)
-        critter.itchy = math.min(critter.itchy + dt, 20)
+        critter.estrus = math.max(critter.estrus*(1 - dt/8), 0)
+        critter.itchy = math.min(critter.itchy + dt/5, 20)
         if distance > 0 then
             critter.anxiety = math.min(critter.anxiety + math.sqrt(distance)/5, 1000)
         else
-            critter.anxiety = math.max(critter.anxiety*(1 - dt/10), 0)
+            critter.anxiety = math.max(critter.anxiety*(1 - dt/10) + critter.itchy*dt/10, 0)
         end
     end
 
@@ -482,17 +482,19 @@ function love.update(dt)
     if curState.onEnterState then
         curState.onEnterState(critter)
     end
+end
 
+function love.keypressed(key, sc, isRepeat)
     if DEBUG then
-        if love.keyboard.isDown("q") then
+        if key == "q" then
             setPose(poses.default)
-        elseif love.keyboard.isDown("w") then
+        elseif key == "w" then
             setPose(poses.anxious)
-        elseif love.keyboard.isDown("e") then
+        elseif key == "e" then
             setPose(poses.frustrated)
         end
 
-        if love.keyboard.isDown("0") then
+        if key == "0" then
             critter.setPattern()
         end
     end

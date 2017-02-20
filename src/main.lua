@@ -508,6 +508,10 @@ function love.keypressed(key, sc, isRepeat)
             setPose(poses.anxious)
         elseif key == "e" then
             setPose(poses.frustrated)
+        elseif key == "r" then
+            setPose(poses.relaxed)
+        elseif key == "t" then
+            setPose(poses.refractory)
         end
 
         if key == "0" then

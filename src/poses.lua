@@ -35,7 +35,32 @@ local poses = {
         overlays = {"poses/frustrated/overlay.png"},
         blush = {"poses/frustrated/blush.png"},
         pupils = {}
-    }
+    },
+    relaxed = {
+        texCoords = {
+            "poses/relaxed/uv4.png",
+            "poses/relaxed/uv3.png",
+            "poses/relaxed/uv2.png",
+            "poses/relaxed/uv1.png"
+            },
+        overlays = {"poses/relaxed/overlay.png"},
+        blush = {"poses/relaxed/blush.png"},
+        pupils = {}
+    },
+    refractory = {
+        texCoords = {
+            "poses/relaxed/uv4.png",
+            "poses/relaxed/uv3.png",
+            "poses/relaxed/uv2.png",
+            "poses/relaxed/uv1.png"
+            },
+        overlays = {
+            "poses/relaxed/overlay.png",
+            "poses/relaxed/refractory.png"
+        },
+        blush = {"poses/relaxed/blush.png"},
+        pupils = {}
+    },
 }
 
 return poses

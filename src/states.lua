@@ -33,6 +33,7 @@ local states = {
     },
 
     relaxed = {
+        pose = "relaxed",
         onEnterState = (function(c)
             -- love.sound.play("sigh")
         end),
@@ -110,6 +111,7 @@ local states = {
     },
 
     refractory = {
+        pose = "refractory",
         nextState = (function(c)
             if c.anxiety > 100 or c.itchy > 18 then
                 return "squirm"

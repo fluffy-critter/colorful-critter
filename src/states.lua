@@ -98,6 +98,7 @@ local states = {
     },
 
     frustrated = {
+        pose = "frustrated",
         nextState = (function(c)
             if c.estrus > 1.8 then
                 return "orgasm"

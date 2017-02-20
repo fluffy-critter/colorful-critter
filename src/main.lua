@@ -185,6 +185,9 @@ function love.draw()
         love.graphics.setShader()
 
         -- draw the critter
+        critter.canvas:renderTo(function()
+            love.graphics.clear(0,0,0,0)
+        end)
         love.graphics.setShader(remapShader)
         remapShader:send("referred", skin.front)
         critter.canvas:renderTo(function()

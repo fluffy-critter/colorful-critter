@@ -112,6 +112,7 @@ function love.load()
     reduceShader = love.graphics.newShader("reduce.fs")
     remapShader = love.graphics.newShader("remap.fs")
     hueshiftShader = love.graphics.newShader("hueshift.fs")
+    thresholdShader = love.graphics.newShader("threshold.fs")
 
     critter.canvas = love.graphics.newCanvas(384, 256)
     critter.pose = love.graphics.newCanvas(384, 256)
@@ -153,12 +154,15 @@ function setPose(pose)
 
     -- draw the UV map
     critter.pose:renderTo(function()
+        love.graphics.setShader(thresholdShader)
+        thresholdShader:send("threshold", 0.75)
         love.graphics.clear(0,0,0,0)
         love.graphics.setColor(255,255,255)
         love.graphics.setBlendMode("alpha", "alphamultiply")
         for _,tc in pairs(critter.texCoords) do
             love.graphics.draw(tc, critter.x, critter.y)
         end
+        love.graphics.setShader()
     end)
     critter.poseMap = critter.pose:newImageData()
 end
@@ -201,10 +205,10 @@ function love.draw()
             love.graphics.clear(0,0,0,0)
         end)
         love.graphics.setShader(remapShader)
+        love.graphics.setBlendMode("alpha", "premultiplied")
         remapShader:send("referred", skin.front)
         critter.canvas:renderTo(function()
             -- skin layers
-            love.graphics.setBlendMode("alpha", "premultiplied")
             for _,tc in pairs(critter.texCoords) do
                 love.graphics.draw(tc, cx, cy)
             end

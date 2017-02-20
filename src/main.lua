@@ -160,6 +160,14 @@ function setPose(pose)
 end
 
 function love.draw()
+    local cx = critter.x
+    local cy = critter.y
+    if critter.estrus > 1.5 then
+        local vib = (critter.estrus - 1.5)*(critter.estrus - 1)*2
+        cx = cx + math.random(-vib, vib)
+        cy = cy + math.random(-vib, vib)
+    end
+
     screen:renderTo(function()
         love.graphics.setCanvas(screen)
         love.graphics.clear(50,70,90)
@@ -194,7 +202,7 @@ function love.draw()
             -- skin layers
             love.graphics.setBlendMode("alpha", "premultiplied")
             for _,tc in pairs(critter.texCoords) do
-                love.graphics.draw(tc, critter.x, critter.y)
+                love.graphics.draw(tc, cx, cy)
             end
         end)
         love.graphics.setShader(hueshiftShader)
@@ -209,10 +217,10 @@ function love.draw()
         love.graphics.setBlendMode("alpha", "alphamultiply")
         love.graphics.setColor(255,255,255)
         for _,ov in pairs(critter.overlays) do
-            love.graphics.draw(ov, critter.x, critter.y)
+            love.graphics.draw(ov, cx, cy)
         end
         for _,ov in pairs(critter.pupils) do
-            love.graphics.draw(ov, critter.x + critter.eyeX, critter.y + critter.eyeY)
+            love.graphics.draw(ov, cx + critter.eyeX, cy + critter.eyeY)
         end
 
         -- aww, it's blushing
@@ -429,13 +437,13 @@ function love.update(dt)
         -- let things calm down a tiny tiny bit
         critter.estrus = math.max(critter.estrus*(1 - dt/10), 0)
         -- as the cursor moves, estrus increases
-        critter.estrus = math.min(critter.estrus + math.sqrt(distance + 1)/500, 5)
+        critter.estrus = math.min(critter.estrus + math.sqrt(distance + 1)/800, 5)
 
-        critter.itchy = math.max(critter.itchy*(1 - dt), 0)
+        critter.itchy = math.max(critter.itchy*(1 - dt/3), 0)
         critter.anxiety = math.max(critter.anxiety*math.sqrt(math.max(1 - dt), 0), 0)
     else
         critter.estrus = math.max(critter.estrus*(1 - dt/8), 0)
-        critter.itchy = math.min(critter.itchy + dt/5, 20)
+        critter.itchy = math.min(critter.itchy + dt/3, 30)
         if distance > 0 then
             critter.anxiety = math.min(critter.anxiety + math.sqrt(distance)/5, 1000)
         else

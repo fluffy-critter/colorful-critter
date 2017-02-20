@@ -120,9 +120,18 @@ local states = {
     },
 
     resetting = {
+        onEnterState = (function(c)
+            c.resetFrames = 0
+            c.resetCount = 1
+        end),
         nextState = (function(c)
-            c.setPattern()
-            if c.estrus < 0.29 then
+            c.resetFrames = c.resetFrames + 1
+            if c.resetFrames >= c.resetCount then
+                c.setPattern()
+                c.resetFrames = 0
+                c.resetCount = c.resetCount + 1
+            end
+            if c.estrus < 0.1 then
                 return "relaxed"
             end
         end)

@@ -21,6 +21,10 @@ critter = {
 
     state = "default",
 
+    -- behavior when resetting the pattern
+    resetFrames = 0,
+    resetCount = 1,
+
     setPattern = function()
          skin.front:renderTo(function()
             -- set the initial pattern
@@ -479,16 +483,16 @@ function love.update(dt)
             if curState.pose then
                 nextPose = curState.pose
             end
+
+            if curState.onEnterState then
+                curState.onEnterState(critter)
+            end
         end
     until not nextState
 
     if nextPose then
         print("nextPose=" .. nextPose)
         setPose(poses[nextPose])
-    end
-
-    if curState.onEnterState then
-        curState.onEnterState(critter)
     end
 end
 

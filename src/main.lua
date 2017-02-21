@@ -13,6 +13,18 @@ local sound = require('sound')
 
 local DEBUG = false
 local paused = false
+local muteButton = {
+    muted = false,
+
+    state = "out",  -- "out" "hover" "active"
+
+
+    colors = {
+        out = {0 , 0, 0},
+        hover = {64, 64, 64},
+        active = {192, 192, 0},
+    }
+}
 
 local skin = {}
 
@@ -183,6 +195,9 @@ function love.load()
     sound.pencil:setVolume(0)
     sound.pencil:setLooping(true)
     sound.pencil:play()
+
+    muteButton.speakerIcon = love.graphics.newImage("assets/speaker-icon.png")
+    muteButton.mutedIcon = love.graphics.newImage("assets/muted-icon.png")
 end
 
 function love.draw()
@@ -289,10 +304,20 @@ function love.draw()
             love.graphics.setColor(255, 255, 255)
             love.graphics.draw(critter.pose, 768 - 256, 512 - 256, 0, 0.5, 0.5)
         end
+
+        -- mute button
+        love.graphics.setColor(unpack(muteButton.colors[muteButton.state]))
+        love.graphics.rectangle("fill", 768 - 32, 512 - 32, 32, 32)
+        love.graphics.setBlendMode("alpha", "alphamultiply")
+        love.graphics.setColor(255,255,255)
+        love.graphics.draw(muteButton.speakerIcon, 768 - 32, 512 - 32)
+        if (muteButton.muted) then
+            love.graphics.draw(muteButton.mutedIcon, 768 - 32, 512 - 32)
+        end
     end)
 
     love.graphics.setBlendMode("alpha", "alphamultiply")
-
+    love.graphics.setColor(255,255,255)
     blitCanvas(screen.canvas)
 
     if DEBUG then
@@ -395,7 +420,10 @@ function love.update(dt)
     end
     critter.eyeY = math.min(2, critter.eyeY)
 
-    if (mx >= 0) and (mx < 96) and (my >= 0) and (my < 512) then
+    muteButton.hovering = false
+    if (mx >= 768 - 32) and (mx < 768) and (my >= 512 - 32) and (my < 512) then
+        muteButton.hovering = true
+    elseif (mx >= 0) and (mx < 96) and (my >= 0) and (my < 512) then
         -- color picker
         if (love.mouse.isDown(1)) then
             pen.color = {screen.colorPicker:getPixel(mx/2, my/2)}
@@ -488,7 +516,27 @@ function love.update(dt)
                 drawThickLine(pen.skinX, pen.skinY, pen.radius, prevSX, prevSY, prevRadius)
             end
         end)
+    end
 
+    if muteButton.state == "out" then
+        if muteButton.hovering then
+            muteButton.state = "hover"
+        end
+    elseif muteButton.state == "hover" then
+        if not muteButton.hovering then
+            muteButton.state = "out"
+        elseif love.mouse.isDown(1) then
+            muteButton.state = "active"
+        end
+    elseif muteButton.state == "active" then
+        if not muteButton.hovering then
+            muteButton.state = "out"
+        elseif not love.mouse.isDown(1) then
+            muteButton.muted = not muteButton.muted
+            muteButton.state = "hover"
+
+            love.audio.setVolume(muteButton.muted and 0 or 1)
+        end
     end
 
     -- affect the critter's state

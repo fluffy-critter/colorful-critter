@@ -1,4 +1,11 @@
--- patterns libraries
+--[[
+Colorful Critter
+
+(c)2017 fluffy @ beesbuzz.biz, all rights reserved
+
+patterns.lua - critter skin generators
+
+]]
 
 function lerp(x, y, a)
     return x*(1 - a) + y

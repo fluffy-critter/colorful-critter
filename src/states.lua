@@ -1,4 +1,7 @@
 --[[
+Colorful Critter
+
+(c)2017 fluffy @ beesbuzz.biz, all rights reserved
 
 states.lua - state transition table for the critter
 

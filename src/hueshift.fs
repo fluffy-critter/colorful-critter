@@ -22,5 +22,5 @@ vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) 
             + (.587-.588*rotU-1.05*rotV)*here.g
             + (.114+.886*rotU-.203*rotV)*here.b
         ),
-        here.a);
+        here.a)*color;
 }

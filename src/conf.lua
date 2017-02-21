@@ -1,3 +1,12 @@
+--[[
+Colorful Critter
+
+(c)2017 fluffy @ beesbuzz.biz, all rights reserved
+
+conf.lua - initial configuration
+
+]]
+
 function love.conf(t)
     t.modules.joystick = false
     t.modules.physics = false

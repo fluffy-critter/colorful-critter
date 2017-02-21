@@ -1,3 +1,14 @@
+--[[Colorful Critter
+
+(c)2017 fluffy @ beesbuzz.biz, all rights reserved
+
+poses.lua - critter poses
+
+When a pose is selected, tables are treated as lists of images to load as textures, and numbers are
+just copied into the critter object.
+
+]]
+
 local poses = {
     default = {
         eyeCX = 500/4,

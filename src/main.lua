@@ -1,3 +1,11 @@
+--[[main.lua - main functionality
+
+Colorful Critter
+
+(c)2017 fluffy @ beesbuzz.biz, all rights reserved
+
+]]
+
 patterns = require('patterns')
 states = require('states')
 poses = require('poses')
@@ -178,6 +186,12 @@ function love.draw()
     end
 
     screen:renderTo(function()
+        local blushAmount = math.max(0, critter.estrus - 0.2)
+        local blushColor = {math.min(255, 255*blushAmount),
+            math.min(63, 31*blushAmount),
+            math.min(127, 31*blushAmount),
+            math.min(255, 255*blushAmount)}
+
         love.graphics.setCanvas(screen)
         love.graphics.clear(50,70,90)
 
@@ -185,27 +199,29 @@ function love.draw()
         love.graphics.setColor(255, 255, 255)
         love.graphics.draw(colorPickerImage, 0, 0)
 
+        -- draw the size selector
         love.graphics.setColor(0,0,0)
-        love.graphics.rectangle("fill", 384 - 48, 0, 48, 48)
+        love.graphics.rectangle("fill", 384 - 48 - 8, 8, 48, 48)
         love.graphics.setColor(unpack(pen.color))
-        love.graphics.ellipse("fill", 384 - 24, 24, pen.size, pen.size)
-        love.graphics.setColor(255,255,255)
+        love.graphics.ellipse("fill", 384 - 24 - 8, 24 + 8, pen.size, pen.size)
 
-        if DEBUG then
-            -- draw the critter's skin preview
-            love.graphics.setShader(hueshiftShader)
-            hueshiftShader:send("basis", {
-                critter.saturation * math.cos(critter.hueshift),
-                critter.saturation * math.sin(critter.hueshift)
-            })
-            love.graphics.setColor(255, 255, 255)
-            love.graphics.draw(skin.front, 384 - 128, 128, 0, 0.5, 0.5)
-            love.graphics.setShader()
+        -- draw the critter's skin preview
+        love.graphics.setColor(255 - blushColor[1],
+            255 - blushColor[2],
+            255 - blushColor[3])
+        love.graphics.rectangle("fill", critter.x, critter.y, 256, 256)
+        love.graphics.setShader(hueshiftShader)
+        love.graphics.setBlendMode("alpha", "alphamultiply")
+        hueshiftShader:send("basis", {
+            critter.saturation * math.cos(critter.hueshift),
+            critter.saturation * math.sin(critter.hueshift)
+        })
+        love.graphics.setColor(255, 255, 255, 63)
+        love.graphics.draw(skin.front, critter.x, critter.y)
+        love.graphics.setShader()
 
-            love.graphics.draw(critter.pose, 384 - 192, 0, 0, 0.5, 0.5)
-        end
-
-        -- draw the critter
+        -- composite the critter's skin
+        love.graphics.setColor(255, 255, 255)
         critter.canvas:renderTo(function()
             love.graphics.clear(0,0,0,0)
         end)
@@ -218,6 +234,17 @@ function love.draw()
                 love.graphics.draw(tc, cx, cy)
             end
         end)
+
+        -- draw the outline
+        love.graphics.setColor(0,0,0,255)
+        for i=-1,1 do
+            for j=-1,1 do
+                love.graphics.draw(critter.canvas, i, j)
+            end
+        end
+
+        -- draw the skin
+        love.graphics.setColor(255,255,255)
         love.graphics.setShader(hueshiftShader)
         hueshiftShader:send("basis", {
             critter.saturation * math.cos(critter.hueshift),
@@ -237,10 +264,7 @@ function love.draw()
         end
 
         -- aww, it's blushing
-        love.graphics.setColor(math.min(255, 255*critter.estrus),
-            math.min(63, 31*critter.estrus),
-            math.min(127, 31*critter.estrus),
-            math.min(255, 255*math.sqrt(critter.estrus)))
+        love.graphics.setColor(unpack(blushColor))
         for _,ov in pairs(critter.blush) do
             love.graphics.draw(ov, critter.x, critter.y)
         end
@@ -248,6 +272,11 @@ function love.draw()
 
         -- draw the paint overlay
         love.graphics.draw(paintOverlay)
+
+        if DEBUG then
+            love.graphics.setColor(255, 255, 255)
+            love.graphics.draw(critter.pose, 384 - 128, 128, 0, 0.5, 0.5)
+        end
     end)
 
     love.graphics.setBlendMode("alpha", "alphamultiply")
@@ -255,6 +284,7 @@ function love.draw()
     blitCanvas(screen)
 
     if DEBUG then
+
         love.graphics.print("Current FPS: "..tostring(love.timer.getFPS()), 0, 0)
 
         love.graphics.print(
@@ -288,7 +318,7 @@ function drawThickLine(x0, y0, r0, x1, y1, r1)
 end
 
 function love.update(dt)
-    critter.hueshift = critter.hueshift + critter.estrus*dt/3
+    critter.hueshift = critter.hueshift + critter.estrus*critter.estrus*dt/3
 
     -- jiggle the chromatophores a bit based on critter's anxiety
     if critter.anxiety > 0 then
@@ -359,8 +389,8 @@ function love.update(dt)
     elseif (mx >= 384 - 48) and (my < 48) then
         -- size adjust
         if love.mouse.isDown(1) then
-            local x = mx - (384 - 24)
-            local y = my - 24
+            local x = mx - (384 - 24 - 8)
+            local y = my - 24 - 8
             pen.size = math.min(24, math.sqrt(x*x + y*y))
             -- pen.size = x/2
             -- pen.opacity = 255 - y*255/32
@@ -411,14 +441,14 @@ function love.update(dt)
 
         -- get the skin location
         local prevSX, prevSY = pen.skinX, pen.skinY
-        local remapped = {0,0,0.0}
+        local remapped
 
         if (pen.x >= 0) and (pen.x < critter.poseMap:getWidth())
             and (pen.y >= 0) and (pen.y < critter.poseMap:getHeight()) then
             remapped = {critter.poseMap:getPixel(pen.x, pen.y)}
         end
 
-        if remapped[4] > 192 then
+        if remapped and remapped[4] > 192 then
             -- pen was on the critter, so re-draw in object space
             pen.skinX, pen.skinY = remapped[1], remapped[2]
             touched = true

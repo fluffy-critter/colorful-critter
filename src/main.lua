@@ -211,6 +211,7 @@ function love.draw()
         -- draw the size selector
         love.graphics.setColor(0,0,0)
         love.graphics.rectangle("fill", 768 - 96 - 16, 16, 96, 96)
+        love.graphics.ellipse("fill", 768 - 48 - 16, 48 + 16, pen.size*2 + 4, pen.size*2 + 4)
         love.graphics.setColor(255, 255, 255)
         love.graphics.ellipse("fill", 768 - 48 - 16, 48 + 16, pen.size*2 + 2, pen.size*2 + 2)
         love.graphics.setColor(unpack(pen.color))
@@ -376,6 +377,7 @@ function love.update(dt)
     pen.drawing = false
 
     local oldColor = pen.color
+    local oldSize = pen.size
 
     local touched = false
     local prevX, prevY = pen.x, pen.y
@@ -524,7 +526,10 @@ function love.update(dt)
         sound.pencil:setVolume(0)
     end
 
-    if pen.color[1] ~= oldColor[1] or pen.color[2] ~= oldColor[2] or pen.color[3] ~= oldColor[3] then
+    local colorDistance = (math.abs(pen.color[1] - oldColor[1]) +
+        math.abs(pen.color[2] - oldColor[2]) +
+        math.abs(pen.color[3] - oldColor[3]))
+    if colorDistance > 8 then
         if love.mouse.isDown(2) then
             sound.eyeDropper:rewind()
             sound.eyeDropper:play()
@@ -532,6 +537,11 @@ function love.update(dt)
             sound.colorPicker:rewind()
             sound.colorPicker:play()
         end
+    end
+
+    if pen.size ~= oldSize then
+        sound.radius:rewind()
+        sound.radius:play()
     end
 
     -- finally, evaluate the state transitions

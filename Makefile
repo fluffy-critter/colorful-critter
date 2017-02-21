@@ -1,12 +1,8 @@
-#!/bin/sh
-# build.sh - build all the builds
-
 TARGET="fluffy/colorful-critter"
 DEST=build
 
 WIN32_ROOT=$(DEST)/love-0.10.2-win32
 WIN64_ROOT=$(DEST)/love-0.10.2-win64
-
 
 .PHONY: clean all
 .PHONY: publish publish-love publish-osx publish-win32 publish-win64 publish-status

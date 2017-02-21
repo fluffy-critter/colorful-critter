@@ -31,6 +31,7 @@ LOVE_VERSION=0.10.2
 .PHONY: clean all
 .PHONY: publish publish-love publish-osx publish-win32 publish-win64 publish-status
 .PHONY: love-bundle osx win32 win64
+.PHONY: assets
 
 all: love-bundle osx win32 win64
 
@@ -42,10 +43,12 @@ publish: publish-love publish-osx publish-win32 publish-win64 publish-status
 publish-status:
 	butler status $(TARGET)
 
+assets: $(shell find raw_assets -name '*.png' -or -name '*.wav')
+	./update-art.sh
+
 # .love bundle
 love-bundle: $(DEST)/love/$(NAME).love
-$(DEST)/love/$(NAME).love: $(shell find src -type f) $(shell find raw_assets -type f)
-	./update-art.sh
+$(DEST)/love/$(NAME).love: $(shell find src -type f) assets
 	mkdir -p $(DEST)/love
 	cd src && zip -9r ../$(@) .
 

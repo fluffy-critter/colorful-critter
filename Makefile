@@ -43,12 +43,14 @@ publish: publish-love publish-osx publish-win32 publish-win64 publish-status
 publish-status:
 	butler status $(TARGET)
 
-assets: $(shell find raw_assets -name '*.png' -or -name '*.wav')
+assets: $(DEST)/.assets
+$(DEST)/.assets: $(shell find raw_assets -name '*.png' -or -name '*.wav')
 	./update-art.sh
+	touch $(@)
 
 # .love bundle
 love-bundle: $(DEST)/love/$(NAME).love
-$(DEST)/love/$(NAME).love: $(shell find src -type f) assets
+$(DEST)/love/$(NAME).love: $(shell find src -type f) $(DEST)/.assets
 	mkdir -p $(DEST)/love
 	cd src && zip -9r ../$(@) .
 

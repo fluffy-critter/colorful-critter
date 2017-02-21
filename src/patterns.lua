@@ -7,11 +7,13 @@ patterns.lua - critter skin generators
 
 ]]
 
-function lerp(x, y, a)
+local patterns = {}
+
+local function lerp(x, y, a)
     return x*(1 - a) + y
 end
 
-function HSV(h, s, v)
+local function HSV(h, s, v)
     if s <= 0 then return v,v,v end
     h, s, v = h/256*6, s/255, v/255
     local c = v*s
@@ -26,7 +28,7 @@ function HSV(h, s, v)
     end return (r+m)*255,(g+m)*255,(b+m)*255
 end
 
-function genColors(n)
+local function genColors(n)
     local colors = {}
     for i=1,n do
         colors[i] = {HSV(math.random(0, 255), 255, math.random(63, 255))}
@@ -34,7 +36,7 @@ function genColors(n)
     return colors
 end
 
-function plaid()
+patterns.plaid = function()
     local r0, g0, b0 = HSV(math.random(0, 255), 255, math.random(63, 255))
     local r1, g1, b1 = HSV(math.random(0, 255), 255, math.random(63, 255))
     local size = math.random(16,64)
@@ -48,7 +50,7 @@ function plaid()
     end
 end
 
-function argyle()
+patterns.argyle = function()
     local colors = genColors(3)
 
     return function(x,y,r,g,b,a)
@@ -58,7 +60,7 @@ function argyle()
     end
 end
 
-function splotchy()
+patterns.splotchy = function()
     local colors = genColors(math.random(2,5))
 
     return function(x,y,r,g,b,a)
@@ -67,13 +69,13 @@ function splotchy()
     end
 end
 
-function random()
+patterns.random = function()
     return function(x,y,r,g,b,a)
         return math.random(0,4)*63,math.random(0,4)*63,math.random(0,4)*63,255
     end
 end
 
-function stripey()
+patterns.stripey = function()
     local colors = genColors(math.random(2,4))
     local amp = math.random(-10.0,10.0)
     local freq = math.random(1.0,5.0)
@@ -86,13 +88,6 @@ function stripey()
     end
 end
 
-choices = {plaid, splotchy, random, argyle, stripey}
+patterns.choices = {patterns.plaid, patterns.splotchy, patterns.random, patterns.argyle, patterns.stripey}
 
-return {
-    plaid=plaid,
-    splotchy=splotchy,
-    random=random,
-    argyle=argyle,
-    stripey=stripey,
-    choices=choices
-}
+return patterns

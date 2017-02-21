@@ -21,7 +21,7 @@ critter = {
     hueshift = 0,
 
     -- render position of the critter
-    x = (384 - 256)/2,
+    x = 384 - 256,
     y = 0,
 
     -- current look-position of the eyes
@@ -105,10 +105,10 @@ end
 function love.load()
     math.randomseed(os.time())
 
-    screen = love.graphics.newCanvas(384, 256)
+    screen = love.graphics.newCanvas(768, 512)
     screen:setFilter("nearest", "nearest")
 
-    paintOverlay = love.graphics.newCanvas(384, 256)
+    paintOverlay = love.graphics.newCanvas(768, 512)
 
     colorPicker = love.image.newImageData("assets/gradient.png")
     colorPickerImage = love.graphics.newImage(colorPicker)
@@ -123,8 +123,8 @@ function love.load()
     hueshiftShader = love.graphics.newShader("hueshift.fs")
     thresholdShader = love.graphics.newShader("threshold.fs")
 
-    critter.canvas = love.graphics.newCanvas(384, 256)
-    critter.pose = love.graphics.newCanvas(384, 256)
+    critter.canvas = love.graphics.newCanvas(768, 512)
+    critter.pose = love.graphics.newCanvas(768, 512)
 
     -- initialize the skin
     skin = {}
@@ -197,19 +197,21 @@ function love.draw()
 
         -- draw the color picker
         love.graphics.setColor(255, 255, 255)
-        love.graphics.draw(colorPickerImage, 0, 0)
+        love.graphics.draw(colorPickerImage, 0, 0, 0, 2, 2)
 
         -- draw the size selector
         love.graphics.setColor(0,0,0)
-        love.graphics.rectangle("fill", 384 - 48 - 8, 8, 48, 48)
+        love.graphics.rectangle("fill", 768 - 96 - 16, 16, 96, 96)
+        love.graphics.setColor(255, 255, 255)
+        love.graphics.ellipse("fill", 768 - 48 - 16, 48 + 16, pen.size*2 + 2, pen.size*2 + 2)
         love.graphics.setColor(unpack(pen.color))
-        love.graphics.ellipse("fill", 384 - 24 - 8, 24 + 8, pen.size, pen.size)
+        love.graphics.ellipse("fill", 768 - 48 - 16, 48 + 16, pen.size*2, pen.size*2)
 
         -- draw the critter's skin preview
         love.graphics.setColor(255 - blushColor[1],
             255 - blushColor[2],
             255 - blushColor[3])
-        love.graphics.rectangle("fill", critter.x, critter.y, 256, 256)
+        love.graphics.rectangle("fill", critter.x, critter.y, 512, 512)
         love.graphics.setShader(hueshiftShader)
         love.graphics.setBlendMode("alpha", "alphamultiply")
         hueshiftShader:send("basis", {
@@ -217,7 +219,7 @@ function love.draw()
             critter.saturation * math.sin(critter.hueshift)
         })
         love.graphics.setColor(255, 255, 255, 63)
-        love.graphics.draw(skin.front, critter.x, critter.y)
+        love.graphics.draw(skin.front, critter.x, critter.y, 0, 2, 2)
         love.graphics.setShader()
 
         -- composite the critter's skin
@@ -275,7 +277,7 @@ function love.draw()
 
         if DEBUG then
             love.graphics.setColor(255, 255, 255)
-            love.graphics.draw(critter.pose, 384 - 128, 128, 0, 0.5, 0.5)
+            love.graphics.draw(critter.pose, 768 - 256, 512 - 256, 0, 0.5, 0.5)
         end
     end)
 
@@ -369,7 +371,7 @@ function love.update(dt)
     pen.x, pen.y = mx, my
     local deltaX = pen.x - prevX
     local deltaY = pen.y - prevY
-    local distance = math.sqrt(deltaX*deltaX + deltaY*deltaY)
+    local distance = math.sqrt(deltaX*deltaX + deltaY*deltaY)/2
 
     critter.eyeX = (mx - (critter.x + critter.eyeCX))/20
     critter.eyeY = (my - (critter.y + critter.eyeCY))/20
@@ -380,18 +382,19 @@ function love.update(dt)
     end
     critter.eyeY = math.min(2, critter.eyeY)
 
-    if (mx >= 0) and (mx < 48) and (my >= 0) and (my < 256) then
+    if (mx >= 0) and (mx < 96) and (my >= 0) and (my < 512) then
         -- color picker
         if (love.mouse.isDown(1)) then
-            pen.color = {colorPicker:getPixel(mx, my)}
+            pen.color = {colorPicker:getPixel(mx/2, my/2)}
             pen.color[4] = pen.opacity
         end
-    elseif (mx >= 384 - 48) and (my < 48) then
+    elseif (mx >= 768 - 96 - 16) and (mx < 768 - 16)
+        and (my > 16) and (my < 96 + 16) then
         -- size adjust
         if love.mouse.isDown(1) then
-            local x = mx - (384 - 24 - 8)
-            local y = my - 24 - 8
-            pen.size = math.min(24, math.sqrt(x*x + y*y))
+            local x = mx - (768 - 16 - 48)
+            local y = my - (16 + 48)
+            pen.size = math.min(24, math.sqrt(x*x + y*y)/2)
             -- pen.size = x/2
             -- pen.opacity = 255 - y*255/32
             -- pen.color[4] = pen.opacity
@@ -411,9 +414,9 @@ function love.update(dt)
         paintOverlay:renderTo(function()
             love.graphics.setColor(unpack(pen.color))
 
-            love.graphics.ellipse("fill", pen.x, pen.y, pen.radius, pen.radius)
+            love.graphics.ellipse("fill", pen.x, pen.y, pen.radius*2, pen.radius*2)
             if prevDrawing then
-                drawThickLine(pen.x, pen.y, pen.radius, prevX, prevY, prevRadius)
+                drawThickLine(pen.x, pen.y, pen.radius*2, prevX, prevY, prevRadius*2)
             end
         end)
 
@@ -454,7 +457,7 @@ function love.update(dt)
             touched = true
         else
             -- pen wasn't on the critter, so draw in screen space
-            pen.skinX, pen.skinY = pen.x - critter.x, pen.y - critter.y
+            pen.skinX, pen.skinY = (pen.x - critter.x)/2, (pen.y - critter.y)/2
         end
 
         -- if the skin position jumped more than 2x the screen position, treat it as discontinuous

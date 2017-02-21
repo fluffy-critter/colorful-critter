@@ -67,9 +67,7 @@ local states = {
         nextState = (function(c)
             if c.estrus > 1.5 then
                 return "orgasm"
-            elseif c.estrus < 0.5 then
-                return "default"
-            elseif c.itchy > 10 then
+            elseif c.estrus < 0.5 or c.itchy > 10 then
                 return "frustrated"
             end
         end)

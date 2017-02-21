@@ -20,6 +20,19 @@ find . -name '*.png' -type f | while read fname ; do
     fi
 done
 
+cd $BASE/raw_assets/icons
+find . -name '*.png' -type f | while read fname ; do
+    srcdir=$(dirname $fname)
+    outdir=$BASE/src/assets/$srcdir
+    outfile=$outdir/$(basename $fname)
+
+    mkdir -p $outdir
+    if [ "$fname" -nt "$outfile" ] ; then
+        printf "%s -> %s\n" $fname $outfile
+        convert -resize 32x32 $fname $outfile
+    fi
+done
+
 cd $BASE/raw_assets/sound
 find . -name '*.wav' -type f | while read fname ; do
     srcdir=$(dirname $fname)

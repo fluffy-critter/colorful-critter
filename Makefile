@@ -45,6 +45,7 @@ publish-status:
 
 assets: $(DEST)/.assets
 $(DEST)/.assets: $(shell find raw_assets -name '*.png' -or -name '*.wav')
+	mkdir -p $(DEST)
 	./update-art.sh
 	touch $(@)
 

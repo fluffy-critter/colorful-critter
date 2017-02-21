@@ -21,8 +21,8 @@ local muteButton = {
 
     colors = {
         out = {0 , 0, 0},
-        hover = {64, 64, 64},
-        active = {192, 192, 0},
+        hover = {192, 192, 0},
+        active = {255, 255, 64},
     }
 }
 

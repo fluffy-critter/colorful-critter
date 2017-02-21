@@ -1,6 +1,31 @@
+# Simple-ish Makefile for building LOVE packages to multiple architectures and publishing to itch.io.
+#
+# Useful targets:
+#
+#   all - build for Windows, OSX, and LOVE bundle
+#   publish - deploy the build to itch.io
+#   publish-status - print the itch.io status
+#
+# The itch publishing stuff uses itch's "butler" mechanism. Read more at https://itch.io/docs/butler/
+#
+# This build environment is set up with the following things in mind:
+#
+#   top-level game directory is in src/
+#   baked assets live in src/assets/
+#   there's a script called ./update-art.sh that automatically bakes assets from raw_assets/
+#
+# Implementing that for your own needs is left as an exercise to the reader. :)
+
+# itch.io target
 TARGET="fluffy/colorful-critter"
+
+# build directory
 DEST=build
+
+# Application name
 NAME=ColorfulCritter
+
+# LOVE version to fetch and build against
 LOVE_VERSION=0.10.2
 
 .PHONY: clean all

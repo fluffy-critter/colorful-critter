@@ -112,6 +112,7 @@ function love.load()
 
     colorPicker = love.image.newImageData("assets/gradient.png")
     colorPickerImage = love.graphics.newImage(colorPicker)
+    colorPickerImage:setFilter("nearest", "nearest")
 
     critter.texCoords = {}
     critter.overlays = {}

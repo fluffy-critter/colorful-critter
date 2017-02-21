@@ -375,6 +375,8 @@ function love.update(dt)
     local prevDrawing = pen.drawing
     pen.drawing = false
 
+    local oldColor = pen.color
+
     local touched = false
     local prevX, prevY = pen.x, pen.y
     pen.x, pen.y = mx, my
@@ -517,9 +519,19 @@ function love.update(dt)
 
     -- handle the sound stuff
     if pen.drawing and (distance > 0) then
-        sound.pencil:setVolume(math.min(distance/255, 1))
+        sound.pencil:setVolume(math.sqrt(distance/255))
     else
         sound.pencil:setVolume(0)
+    end
+
+    if pen.color[1] ~= oldColor[1] or pen.color[2] ~= oldColor[2] or pen.color[3] ~= oldColor[3] then
+        if love.mouse.isDown(2) then
+            sound.eyeDropper:rewind()
+            sound.eyeDropper:play()
+        else
+            sound.colorPicker:rewind()
+            sound.colorPicker:play()
+        end
     end
 
     -- finally, evaluate the state transitions

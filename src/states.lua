@@ -19,6 +19,8 @@ stateName = {
 
 ]]
 
+local sound = require('sound')
+
 local states = {
     default = {
         pose = "default",
@@ -144,10 +146,12 @@ local states = {
         end),
         nextState = (function(c)
             c.resetFrames = c.resetFrames + 1
-            if c.resetFrames >= c.resetCount and c.resetCount < 10 then
+            if c.resetFrames >= c.resetCount*5 and c.resetCount <= 5 then
                 c.setPattern()
                 c.resetFrames = 0
                 c.resetCount = c.resetCount + 1
+                sound.reset:rewind()
+                sound.reset:play()
             end
             if c.estrus < 0.1 then
                 return "relaxed"
@@ -162,10 +166,12 @@ local states = {
         end),
         nextState = (function(c)
             c.resetFrames = c.resetFrames + 1
-            if c.resetFrames >= c.resetCount and c.resetCount < 10 then
+            if c.resetFrames >= c.resetCount*4 and c.resetCount <= 8 then
                 c.setPattern()
                 c.resetFrames = 0
                 c.resetCount = c.resetCount + 1
+                sound.reset:rewind()
+                sound.reset:play()
             end
             if c.estrus < 0.03 then
                 return "relaxed"

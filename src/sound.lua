@@ -4,15 +4,17 @@ Colorful Critter
 
 (c)2017 fluffy @ beesbuzz.biz, all rights reserved
 
+
+NOTE: If two sounds end up sharing the same source, they should be set up as mappings to the same object
+
 ]]
 
-local sounds = {
+local sound = {
     pencil = love.audio.newSource("sound/pencil.ogg"),
 
-    c1 = love.audio.newSource("sound/c1.ogg"),
-    c2 = love.audio.newSource("sound/c2.ogg"),
-    c3 = love.audio.newSource("sound/c3.ogg"),
-    c4 = love.audio.newSource("sound/c4.ogg"),
+    colorPicker = love.audio.newSource("sound/c2.ogg"),
+    reset = love.audio.newSource("sound/c3.ogg"),
+    eyeDropper = love.audio.newSource("sound/c4.ogg"),
 }
 
-return sounds
+return sound

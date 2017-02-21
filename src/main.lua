@@ -2,7 +2,8 @@ patterns = require('patterns')
 states = require('states')
 poses = require('poses')
 
-DEBUG = true
+DEBUG = false
+paused = false
 
 critter = {
     anxiety = 10,   -- pointer movement without being touched
@@ -185,22 +186,24 @@ function love.draw()
         love.graphics.draw(colorPickerImage, 0, 0)
 
         love.graphics.setColor(0,0,0)
-        love.graphics.rectangle("fill", colorPicker:getWidth(), 0, 64, 64)
+        love.graphics.rectangle("fill", 384 - 48, 0, 48, 48)
         love.graphics.setColor(unpack(pen.color))
-        love.graphics.ellipse("fill", colorPicker:getWidth() + 32, 32, pen.size, pen.size)
+        love.graphics.ellipse("fill", 384 - 24, 24, pen.size, pen.size)
         love.graphics.setColor(255,255,255)
 
-        -- draw the critter's skin preview
-        love.graphics.setShader(hueshiftShader)
-        hueshiftShader:send("basis", {
-            critter.saturation * math.cos(critter.hueshift),
-            critter.saturation * math.sin(critter.hueshift)
-        })
-        love.graphics.setColor(255, 255, 255)
-        love.graphics.draw(skin.front, 384 - 128, 128, 0, 0.5, 0.5)
-        love.graphics.setShader()
+        if DEBUG then
+            -- draw the critter's skin preview
+            love.graphics.setShader(hueshiftShader)
+            hueshiftShader:send("basis", {
+                critter.saturation * math.cos(critter.hueshift),
+                critter.saturation * math.sin(critter.hueshift)
+            })
+            love.graphics.setColor(255, 255, 255)
+            love.graphics.draw(skin.front, 384 - 128, 128, 0, 0.5, 0.5)
+            love.graphics.setShader()
 
-        love.graphics.draw(critter.pose, 384 - 128, 0, 0, 0.5, 0.5)
+            love.graphics.draw(critter.pose, 384 - 192, 0, 0, 0.5, 0.5)
+        end
 
         -- draw the critter
         critter.canvas:renderTo(function()
@@ -353,12 +356,12 @@ function love.update(dt)
             pen.color = {colorPicker:getPixel(mx, my)}
             pen.color[4] = pen.opacity
         end
-    elseif (mx >= 48) and (mx < 48 + 64) and (my >= 0) and (my < 64) then
+    elseif (mx >= 384 - 48) and (my < 48) then
         -- size adjust
         if love.mouse.isDown(1) then
-            local x = mx - 48 - 32
-            local y = my - 32
-            pen.size = math.min(32, math.sqrt(x*x + y*y))
+            local x = mx - (384 - 24)
+            local y = my - 24
+            pen.size = math.min(24, math.sqrt(x*x + y*y))
             -- pen.size = x/2
             -- pen.opacity = 255 - y*255/32
             -- pen.color[4] = pen.opacity
@@ -442,22 +445,24 @@ function love.update(dt)
 
     end
 
-    -- mouse motions should affect the critter's state
-    if touched then
-        -- let things calm down a tiny tiny bit
-        critter.estrus = math.max(critter.estrus*(1 - dt/10), 0)
-        -- as the cursor moves, estrus increases
-        critter.estrus = math.min(critter.estrus + math.sqrt(distance + 1)/800, 5)
+    -- affect the critter's state
+    if not paused then
+        if touched then
+            -- let things calm down a tiny tiny bit
+            critter.estrus = math.max(critter.estrus*(1 - dt/10), 0)
+            -- as the cursor moves, estrus increases
+            critter.estrus = math.min(critter.estrus + math.sqrt(distance + 1)/800, 5)
 
-        critter.itchy = math.max(critter.itchy*(1 - dt/3), 0)
-        critter.anxiety = math.max(critter.anxiety*math.sqrt(math.max(1 - dt), 0), 0)
-    else
-        critter.estrus = math.max(critter.estrus*(1 - dt/8), 0)
-        critter.itchy = math.min(critter.itchy + dt/3, 30)
-        if distance > 0 then
-            critter.anxiety = math.min(critter.anxiety + math.sqrt(distance)/5, 1000)
+            critter.itchy = math.max(critter.itchy*(1 - dt/3), 0)
+            critter.anxiety = math.max(critter.anxiety*math.sqrt(math.max(1 - dt), 0), 0)
         else
-            critter.anxiety = math.max(critter.anxiety*(1 - dt/10) + critter.itchy*dt/10, 0)
+            critter.estrus = math.max(critter.estrus*(1 - dt/8), 0)
+            critter.itchy = math.min(critter.itchy + dt/3, 30)
+            if distance > 0 then
+                critter.anxiety = math.min(critter.anxiety + math.sqrt(distance)/5, 1000)
+            else
+                critter.anxiety = math.max(critter.anxiety*(1 - dt/10) + critter.itchy*dt/10, 0)
+            end
         end
     end
 
@@ -502,7 +507,34 @@ function love.update(dt)
     end
 end
 
+_debugSequence = {"+lctrl", "+lshift", "-lctrl", "+lalt"}
+_debugPos = 1
+
+function _debugLatch(key)
+    if key == _debugSequence[_debugPos] then
+        _debugPos = _debugPos + 1
+        if _debugPos > #_debugSequence then
+            DEBUG = not DEBUG
+        end
+        return true
+    else
+        _debugPos = 1
+    end
+end
+
+function love.keyreleased(key, sc)
+    _debugLatch("-" .. key)
+end
+
 function love.keypressed(key, sc, isRepeat)
+    _debugLatch("+" .. key)
+
+    print("key pressed: " .. key .. " sc=" .. sc .. " repeat=" .. tostring(isRepeat))
+
+    if key == "space" then
+        paused = not paused
+    end
+
     if DEBUG then
         if key == "q" then
             setPose(poses.default)
@@ -514,10 +546,30 @@ function love.keypressed(key, sc, isRepeat)
             setPose(poses.relaxed)
         elseif key == "t" then
             setPose(poses.refractory)
+        elseif key == "a" then
+            setPose(poses.aroused)
+        elseif key == "s" then
+            setPose(poses.orgasm)
+        elseif key == "d" then
+            setPose(poses.hyperorgasm)
+        elseif key == "f" then
+            setPose(poses.hyperrefractory)
         end
 
         if key == "0" then
             critter.setPattern()
+        end
+
+        -- test all states and their poses
+        if key == "7" then
+            for n,s in pairs(states) do
+                print("state: " .. n)
+                local pose = s.pose
+                if pose then
+                    print("pose: " .. pose)
+                    setPose(poses[pose])
+                end
+            end
         end
     end
 end

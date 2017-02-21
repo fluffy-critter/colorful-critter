@@ -60,6 +60,7 @@ local states = {
     },
 
     aroused = {
+        pose = "aroused",
         nextState = (function(c)
             if c.estrus > 1.5 then
                 return "orgasm"
@@ -72,6 +73,7 @@ local states = {
     },
 
     orgasm = {
+        pose = "orgasm",
         nextState = (function(c)
             if c.estrus < 0.9 then
                 return "refractory"
@@ -82,14 +84,16 @@ local states = {
     },
 
     hyperorgasm = {
+        pose = "hyperorgasm",
         nextState = (function(c)
             if c.estrus < 1.0 then
-                return "refractory"
+                return "hyperrefractory"
             end
         end)
     },
 
     itchy = {
+        pose = "anxious",
         nextState = (function(c)
             if c.anxiety > 200 or c.estrus > 0.8 then
                 return "frustrated"
@@ -104,6 +108,8 @@ local states = {
         nextState = (function(c)
             if c.estrus > 1.8 then
                 return "orgasm"
+            elseif c.estrus > 1.0 and c.anxiety < 50 then
+                return "aroused"
             elseif c.anxiety < 30 and c.itchy < 3 then
                 return "default"
             end
@@ -121,6 +127,15 @@ local states = {
         end)
     },
 
+    hyperrefractory = {
+        pose = "hyperrefractory",
+        nextState = (function(c)
+            if c.estrus < 0.08 then
+                return "hyperresetting"
+            end
+        end)
+    },
+
     resetting = {
         onEnterState = (function(c)
             c.resetFrames = 0
@@ -128,12 +143,30 @@ local states = {
         end),
         nextState = (function(c)
             c.resetFrames = c.resetFrames + 1
-            if c.resetFrames >= c.resetCount then
+            if c.resetFrames >= c.resetCount and c.resetCount < 10 then
                 c.setPattern()
                 c.resetFrames = 0
                 c.resetCount = c.resetCount + 1
             end
             if c.estrus < 0.1 then
+                return "relaxed"
+            end
+        end)
+    },
+
+    hyperresetting = {
+        onEnterState = (function(c)
+            c.resetFrames = 0
+            c.resetCount = 1
+        end),
+        nextState = (function(c)
+            c.resetFrames = c.resetFrames + 1
+            if c.resetFrames >= c.resetCount and c.resetCount < 10 then
+                c.setPattern()
+                c.resetFrames = 0
+                c.resetCount = c.resetCount + 1
+            end
+            if c.estrus < 0.03 then
                 return "relaxed"
             end
         end)

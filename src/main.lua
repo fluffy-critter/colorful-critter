@@ -71,6 +71,8 @@ local critter = {
     overlays = {},
     blush = {},
     pupils = {},
+    halo = {},
+    haloBright = 0
 }
 
 local canvasPosition = {
@@ -295,9 +297,25 @@ function love.draw()
         for _,ov in pairs(critter.blush) do
             love.graphics.draw(ov, critter.x, critter.y)
         end
-        love.graphics.setColor(255,255,255)
+
+        -- aww, it's.... really blushing
+        if critter.halo then
+            love.graphics.setBlendMode("alpha", "alphamultiply")
+            love.graphics.setColor(255, 255, 255, math.min(255, critter.haloBright*255))
+            love.graphics.setShader(shaders.hueshift)
+            shaders.hueshift:send("basis", {
+                critter.saturation * math.cos(critter.hueshift*5),
+                critter.saturation * math.sin(critter.hueshift*5)
+            })
+            for _,ov in pairs(critter.halo) do
+                love.graphics.draw(ov, cx, cy)
+            end
+            love.graphics.setShader()
+        end
 
         -- draw the paint overlay
+        love.graphics.setBlendMode("alpha", "alphamultiply")
+        love.graphics.setColor(255,255,255)
         love.graphics.draw(screen.paintOverlay)
 
         if DEBUG then
@@ -356,6 +374,7 @@ end
 
 function love.update(dt)
     critter.hueshift = critter.hueshift + critter.estrus*critter.estrus*dt/3
+    critter.haloBright = critter.haloBright*(1 - dt/5) + critter.estrus*dt/5;
 
     -- jiggle the chromatophores a bit based on critter's anxiety
     if critter.anxiety > 0 then

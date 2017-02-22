@@ -21,7 +21,8 @@ local poses = {
             },
         overlays = {"poses/default/overlay.png"},
         blush = {"poses/default/blush.png"},
-        pupils = {"poses/default/pupils.png"}
+        pupils = {"poses/default/pupils.png"},
+        halo = {},
     },
     anxious = {
         eyeCX = 500/4,
@@ -34,7 +35,8 @@ local poses = {
             },
         overlays = {"poses/anxious/overlay.png"},
         blush = {"poses/anxious/blush.png"},
-        pupils = {"poses/anxious/pupils.png"}
+        pupils = {"poses/anxious/pupils.png"},
+        halo = {},
     },
     aroused = {
         eyeCX = 500/4,
@@ -47,36 +49,32 @@ local poses = {
             },
         overlays = {"poses/aroused/overlay.png"},
         blush = {"poses/aroused/blush.png"},
-        pupils = {"poses/aroused/pupils.png"}
+        pupils = {"poses/aroused/pupils.png"},
+        halo = {},
     },
-    orgasm = { -- TODO eyes closed, hands on chest
-        eyeCX = 500/4,
-        eyeCY = 172/4,
+    orgasm = {
         texCoords = {
             "poses/aroused/uv4.png",
             "poses/aroused/uv3.png",
             "poses/aroused/uv2.png",
-            "poses/aroused/uv1.png"
+            "poses/aroused/orgasm-uv1.png"
             },
-        overlays = {"poses/aroused/overlay.png"},
-        blush = {"poses/orgasm/blush.png"},
-        pupils = {"poses/aroused/pupils.png"}
+        overlays = {"poses/aroused/orgasm-overlay.png"},
+        blush = {"poses/aroused/blush.png"},
+        pupils = {},
+        halo = {},
     },
-    hyperorgasm = { -- TODO eyes closed, hands on chest
-        eyeCX = 500/4,
-        eyeCY = 172/4,
+    hyperorgasm = {
         texCoords = {
             "poses/aroused/uv4.png",
             "poses/aroused/uv3.png",
             "poses/aroused/uv2.png",
-            "poses/aroused/uv1.png"
+            "poses/aroused/orgasm-uv1.png"
             },
-        overlays = {"poses/aroused/overlay.png"},
-        blush = {
-            "poses/orgasm/blush.png",
-            "poses/orgasm/halo.png"
-        },
-        pupils = {"poses/aroused/pupils.png"}
+        overlays = {"poses/aroused/orgasm-overlay.png"},
+        blush = {"poses/aroused/blush.png"},
+        pupils = {},
+        halo = {"poses/aroused/halo.png"},
     },
     frustrated = {
         texCoords = {
@@ -87,7 +85,8 @@ local poses = {
             },
         overlays = {"poses/frustrated/overlay.png"},
         blush = {"poses/frustrated/blush.png"},
-        pupils = {}
+        pupils = {},
+        halo = {},
     },
     relaxed = {
         texCoords = {
@@ -98,7 +97,8 @@ local poses = {
             },
         overlays = {"poses/relaxed/overlay.png"},
         blush = {"poses/relaxed/blush.png"},
-        pupils = {}
+        pupils = {},
+        halo = {},
     },
     refractory = {
         texCoords = {
@@ -114,7 +114,8 @@ local poses = {
         blush = {
             "poses/relaxed/blush.png"
         },
-        pupils = {}
+        pupils = {},
+        halo = {},
     },
     hyperrefractory = {
         texCoords = {
@@ -129,9 +130,9 @@ local poses = {
         },
         blush = {
             "poses/relaxed/blush.png",
-            "poses/relaxed/refractory-halo.png"
         },
-        pupils = {}
+        pupils = {},
+        halo =  {"poses/relaxed/refractory-halo.png"},
     },
 }
 

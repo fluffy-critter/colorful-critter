@@ -88,6 +88,9 @@ local states = {
 
     hyperorgasm = {
         pose = "hyperorgasm",
+        onEnterState = (function(c)
+            c.haloBright = 0.0
+        end),
         nextState = (function(c)
             if c.estrus < 1.0 then
                 return "hyperrefractory"

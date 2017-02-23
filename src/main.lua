@@ -580,7 +580,7 @@ function love.update(dt)
     end
 
     -- grab the color from the cursor position (slow, should come last)
-    if love.mouse.isDown(2) then
+    if love.mouse.isDown(2) and (mx >= 0) and (mx < 768) and (my >= 0) and (my < 512) then
         local foo = screen.canvas:newImageData()
         pen.color = {foo:getPixel(mx, my)}
         pen.color[4] = pen.opacity

@@ -68,7 +68,7 @@ patterns.argyle = function()
 end
 
 patterns.splotchy = function()
-    local colors = genColors(math.random(2,5))
+    local colors = genColors(math.random(2,4))
 
     return function(x,y)
         local color = colors[math.random(#colors)]
@@ -150,6 +150,29 @@ patterns.polka = function()
     end
 end
 
+patterns.weave = function()
+    local colors = genColors(math.random(2,5))
+    local wavX, wavY = {}, {}
+    for i,c in pairs(colors) do
+        wavX[i] = math.random()/5 + 0.01
+        wavY[i] = (math.random()/2 + 0.75)*wavX[i]
+    end
+    return function(x,y)
+        local maxV
+        local maxC
+
+        for i,c in pairs(colors) do
+            local v = math.sin(x/wavX[i]) + math.sin(y/wavY[i])
+            if not maxV or v > maxV then
+                maxV = v
+                maxC = c
+            end
+        end
+        return maxC[1], maxC[2], maxC[3], 255
+    end
+end
+
+
 patterns.choices = {
     patterns.plaid,
     patterns.splotchy,
@@ -157,7 +180,8 @@ patterns.choices = {
     patterns.argyle,
     patterns.stripey,
     patterns.nm,
-    patterns.polka
+    patterns.polka,
+    patterns.weave,
 }
 
 return patterns

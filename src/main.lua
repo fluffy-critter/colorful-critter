@@ -54,7 +54,7 @@ local critter = {
             -- set the initial pattern
             local startState = love.image.newImageData(256, 256)
             local pattern = p or patterns.choices[math.random(#patterns.choices)]
-            -- local pattern = patterns.polka
+            -- local pattern = patterns.weave
             startState:mapPixel(pattern())
             local startImage = love.graphics.newImage(startState)
             love.graphics.draw(startImage)
@@ -197,6 +197,7 @@ function love.load()
 
     setPose(poses.default)
 
+    -- pencil sound loop
     sound.pencil:setVolume(0)
     sound.pencil:setLooping(true)
     sound.pencil:play()
@@ -346,9 +347,9 @@ function love.draw()
         love.graphics.print("Current FPS: "..tostring(love.timer.getFPS()), 0, 0)
 
         love.graphics.print(
-            string.format("state: %s anxiety: %.1f itchy:%.1f estrus:%.1f",
+            string.format("state: %s anxiety: %.1f itchy:%.1f estrus:%.1f hue:%.0f",
                 critter.state,
-                critter.anxiety, critter.itchy, critter.estrus),
+                critter.anxiety, critter.itchy, critter.estrus, critter.hueshift*180/math.pi%360),
             love.graphics.getWidth()/2, 0)
     end
 end
@@ -427,7 +428,7 @@ local function pumpStateGraph(critter)
 end
 
 function love.update(dt)
-    critter.hueshift = critter.hueshift + critter.estrus*critter.estrus*dt/3
+    critter.hueshift = critter.hueshift + math.pow(critter.estrus,4)*dt/10
     critter.haloBright = critter.haloBright*(1 - dt/5) + critter.estrus*dt/5;
 
     -- jiggle the chromatophores a bit based on critter's anxiety
@@ -769,3 +770,4 @@ function love.keypressed(key, sc, isRepeat)
         end
     end
 end
+

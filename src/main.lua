@@ -60,9 +60,9 @@ local critter = {
             love.graphics.draw(startImage)
 
             love.graphics.setColor(math.random(128,255),math.random(128,255),math.random(128,255))
-            love.graphics.rectangle("fill", 0, 0, 64, 56)
+            love.graphics.rectangle("fill", 0, 0, 48, 48)
             love.graphics.setColor(math.random(128,255),math.random(128,255),math.random(128,255))
-            love.graphics.rectangle("fill", 192, 0, 64, 56)
+            love.graphics.rectangle("fill", 208, 0, 48, 48)
             love.graphics.setColor(255,255,255)
         end)
     end,
@@ -72,7 +72,10 @@ local critter = {
     blush = {},
     pupils = {},
     halo = {},
-    haloBright = 0
+    haloBright = 0,
+
+    eyeMinY = -5,
+    eyeMaxY = 2,
 }
 
 local canvasPosition = {
@@ -442,7 +445,7 @@ function love.update(dt)
         critter.eyeY = critter.eyeY*8 / eyeD
     end
     critter.eyeX = math.max(-5, math.min(5, critter.eyeX))
-    critter.eyeY = math.max(-5, math.min(2, critter.eyeY))
+    critter.eyeY = math.max(critter.eyeMinY, math.min(critter.eyeMaxY, critter.eyeY))
 
     muteButton.hovering = false
     if (mx >= 768 - 32) and (mx < 768) and (my >= 512 - 32) and (my < 512) then
@@ -699,6 +702,8 @@ function love.keypressed(key, sc, isRepeat)
             setPose(poses.hyperorgasm)
         elseif key == "f" then
             setPose(poses.hyperrefractory)
+        elseif key == "g" then
+            setPose(poses.angry)
         end
 
         if key == "0" then

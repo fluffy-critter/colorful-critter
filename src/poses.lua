@@ -13,6 +13,8 @@ local poses = {
     default = {
         eyeCX = 500/2,
         eyeCY = 172/2,
+        eyeMinY = -5,
+        eyeMaxY = 2,
         texCoords = {
             "poses/default/uv4.png",
             "poses/default/uv3.png",
@@ -27,6 +29,8 @@ local poses = {
     anxious = {
         eyeCX = 500/2,
         eyeCY = 172/2,
+        eyeMinY = -5,
+        eyeMaxY = 2,
         texCoords = {
             "poses/anxious/uv4.png",
             "poses/anxious/uv3.png",
@@ -38,9 +42,27 @@ local poses = {
         pupils = {"poses/anxious/pupils.png"},
         halo = {},
     },
+    angry = {
+        eyeCX = 500/2,
+        eyeCY = 172/2,
+        eyeMinY = -2,
+        eyeMaxY = 2,
+        texCoords = {
+            "poses/angry/uv4.png",
+            "poses/angry/uv3.png",
+            "poses/angry/uv2.png",
+            "poses/angry/uv1.png"
+            },
+        overlays = {"poses/angry/overlay.png"},
+        blush = {"poses/angry/blush.png"},
+        pupils = {"poses/angry/pupils.png"},
+        halo = {},
+    },
     aroused = {
         eyeCX = 500/2,
         eyeCY = 172/2,
+        eyeMinY = -5,
+        eyeMaxY = 2,
         texCoords = {
             "poses/aroused/uv4.png",
             "poses/aroused/uv3.png",

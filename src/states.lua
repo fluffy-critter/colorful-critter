@@ -67,6 +67,7 @@ local states = {
     },
 
     angry = {
+        pose = "angry",
         nextState = (function(c)
             if c.estrus > 1.3 then
                 return "frustrated"

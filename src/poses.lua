@@ -91,9 +91,9 @@ local poses = {
             "poses/aroused/uv4.png",
             "poses/aroused/uv3.png",
             "poses/aroused/uv2.png",
-            "poses/aroused/orgasm-uv1.png"
+            "poses/aroused/hyperorgasm-uv1.png"
             },
-        overlays = {"poses/aroused/orgasm-overlay.png"},
+        overlays = {"poses/aroused/hyperorgasm-overlay.png"},
         blush = {"poses/aroused/blush.png"},
         pupils = {},
         halo = {"poses/aroused/halo.png"},

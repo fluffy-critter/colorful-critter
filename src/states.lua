@@ -168,6 +168,8 @@ local states = {
         onEnterState = (function(c)
             c.resetFrames = 0
             c.resetCount = 1
+            c.skin.front:setFilter("nearest", "nearest")
+            c.skin.back:setFilter("nearest", "nearest")
         end),
         nextState = (function(c)
             c.resetFrames = c.resetFrames + 1

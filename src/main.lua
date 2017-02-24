@@ -703,6 +703,8 @@ function love.keypressed(key, sc, isRepeat)
 
         if key == "0" then
             critter.setPattern()
+        elseif key == "9" then
+            critter.setPattern(patterns.polka)
         end
 
         -- test all states and their poses

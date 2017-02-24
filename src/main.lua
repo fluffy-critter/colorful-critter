@@ -375,6 +375,57 @@ local function drawThickLine(x0, y0, r0, x1, y1, r1)
         )
 end
 
+local function pumpStateGraph(critter)
+    local curState = states[critter.state]
+    local nextState
+    local nextPose
+    local seenStates = {critter.state}
+    local stateChain = {critter.state}
+    repeat
+        nextState = curState.nextState(critter)
+
+        if nextState then
+            table.insert(stateChain, nextState)
+
+            -- detect logic cycles
+            if seenStates[nextState] then
+                local chain = ""
+                for i,s in ipairs(stateChain) do
+                    if i > 1 then
+                        chain = chain .. " -> "
+                    end
+                    chain = chain .. string.sub(s,1,3)
+                end
+                error(string.format("state cycle: %s  ax=%.1f it=%.1f es=%.1f",
+                    chain,
+                    critter.anxiety, critter.itchy, critter.estrus))
+            end
+            seenStates[nextState] = true
+
+            if DEBUG then
+                print("nextState = "..string.sub(nextState,1,3))
+            end
+
+            critter.state = nextState
+            curState = states[nextState]
+            if curState.pose then
+                nextPose = curState.pose
+            end
+
+            if curState.onEnterState then
+                curState.onEnterState(critter)
+            end
+        end
+    until not nextState
+
+    if nextPose then
+        if DEBUG then
+            print("nextPose=" .. nextPose)
+        end
+        setPose(poses[nextPose])
+    end
+end
+
 function love.update(dt)
     critter.hueshift = critter.hueshift + critter.estrus*critter.estrus*dt/3
     critter.haloBright = critter.haloBright*(1 - dt/5) + critter.estrus*dt/5;
@@ -620,44 +671,7 @@ function love.update(dt)
     end
 
     -- finally, evaluate the state transitions
-    local curState = states[critter.state]
-    local nextState
-    local nextPose
-    local seenStates = {}
-    repeat
-        nextState = curState.nextState(critter)
-
-        if nextState then
-            -- detect logic cycles
-            if seenStates[nextState] then
-                error(string.format("state cycle: %s -> %s  ax=%.1f it=%.1f es=%.1f",
-                    string.sub(critter.state,1,3), string.sub(nextState,1,3),
-                    critter.anxiety, critter.itchy, critter.estrus))
-            end
-            seenStates[nextState] = true
-
-            if DEBUG then
-                print("nextState = "..string.sub(nextState,1,3))
-            end
-
-            critter.state = nextState
-            curState = states[nextState]
-            if curState.pose then
-                nextPose = curState.pose
-            end
-
-            if curState.onEnterState then
-                curState.onEnterState(critter)
-            end
-        end
-    until not nextState
-
-    if nextPose then
-        if DEBUG then
-            print("nextPose=" .. nextPose)
-        end
-        setPose(poses[nextPose])
-    end
+    pumpStateGraph(critter)
 end
 
 local _debug = {
@@ -730,6 +744,27 @@ function love.keypressed(key, sc, isRepeat)
                     print("pose: " .. pose)
                     setPose(poses[pose])
                 end
+            end
+        elseif key == "`" then
+            -- test the state machine
+            seenStates = {}
+            for state,_ in pairs(states) do
+                print("testing state " .. state)
+                for n = 1,100 do
+                    local e=math.random(0.0,3.0)
+                    local i=math.random(0.0,20.0)
+                    local a=math.random(0.0,200.0)
+                    print(state, n, e, i, a)
+                    critter.state = state
+                    critter.anxiety = a
+                    critter.itchy = i
+                    critter.estrus = e
+                    pumpStateGraph(critter)
+                    seenStates[critter.state] = true
+                end
+            end
+            for state,_ in pairs(states) do
+                print("state " .. ": " .. (seenStates[state] and "found" or "NOT FOUND"))
             end
         end
     end

@@ -37,7 +37,7 @@ local function genColors(n)
     local colors = {}
 
     for i=1,n do
-        colors[i] = {HSV(hue%256, 255, math.random(128, 255))}
+        table.insert(colors, {HSV(hue%256, 255, math.random(128, 255))})
         hue = hue + math.random(hueSpacing/2, hueSpacing*2)
     end
     return colors

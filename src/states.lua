@@ -25,14 +25,14 @@ local states = {
     default = {
         pose = "default",
         nextState = (function(c)
-            if c.anxiety < 5 and c.itchy < 5 then
+            if c.estrus > 0.8 then
+                return "aroused"
+            elseif c.anxiety < 5 and c.itchy < 5 then
                 return "relaxed"
             elseif c.anxiety > 70 then
                 return "anxious"
             elseif c.itchy > 8 then
                 return "itchy"
-            elseif c.estrus > 0.8 then
-                return "aroused"
             end
         end)
     },
@@ -56,7 +56,7 @@ local states = {
     anxious = {
         pose = "anxious",
         nextState = (function(c)
-            if c.anxiety < 80 and c.estrus <= 1.0 then
+            if c.anxiety < 50 and c.estrus <= 1.0 then
                 return "default"
             elseif c.itchy > 9 then
                 return "angry"
@@ -71,9 +71,7 @@ local states = {
         nextState = (function(c)
             if c.estrus > 1.3 then
                 return "frustrated"
-            elseif c.itchy < 0.5 then
-                return "relaxed"
-            elseif c.anxiety < 70 then
+            elseif c.itchy < 0.5 and c.anxiety < 70 then
                 return "default"
             end
         end)

@@ -27,9 +27,9 @@ local states = {
         nextState = (function(c)
             if c.anxiety < 5 and c.itchy < 5 then
                 return "relaxed"
-            elseif c.anxiety > 100 then
+            elseif c.anxiety > 70 then
                 return "anxious"
-            elseif c.itchy > 12 then
+            elseif c.itchy > 8 then
                 return "itchy"
             elseif c.estrus > 0.8 then
                 return "aroused"
@@ -84,6 +84,8 @@ local states = {
         nextState = (function(c)
             if c.estrus > 1.5 then
                 return "orgasm"
+            elseif c.anxiety > 100 then
+                return "angry"
             elseif c.estrus < 0.5 or c.itchy > 10 then
                 return "frustrated"
             end
@@ -118,6 +120,8 @@ local states = {
         nextState = (function(c)
             if c.anxiety > 200 or c.estrus > 0.8 then
                 return "frustrated"
+            elseif c.itchy > 10 and c.anxiety > 80 then
+                return "angry"
             elseif c.itchy < 1 then
                 return "default"
             end

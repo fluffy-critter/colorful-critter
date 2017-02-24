@@ -630,11 +630,16 @@ function love.update(dt)
         if nextState then
             -- detect logic cycles
             if seenStates[nextState] then
-                error("state cycle")
+                error(string.format("state cycle: %s -> %s  ax=%.1f it=%.1f es=%.1f",
+                    string.sub(critter.state,1,3), string.sub(nextState,1,3),
+                    critter.anxiety, critter.itchy, critter.estrus))
             end
             seenStates[nextState] = true
 
-            print("nextState = "..nextState)
+            if DEBUG then
+                print("nextState = "..string.sub(nextState,1,3))
+            end
+
             critter.state = nextState
             curState = states[nextState]
             if curState.pose then
@@ -648,7 +653,9 @@ function love.update(dt)
     until not nextState
 
     if nextPose then
-        print("nextPose=" .. nextPose)
+        if DEBUG then
+            print("nextPose=" .. nextPose)
+        end
         setPose(poses[nextPose])
     end
 end
@@ -677,7 +684,9 @@ end
 function love.keypressed(key, sc, isRepeat)
     _debugLatch("+" .. key)
 
-    print("key pressed: " .. key .. " sc=" .. sc .. " repeat=" .. tostring(isRepeat))
+    if DEBUG then
+        print("key pressed: " .. key .. " sc=" .. sc .. " repeat=" .. tostring(isRepeat))
+    end
 
     if key == "space" then
         paused = not paused

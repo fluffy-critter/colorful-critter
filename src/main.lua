@@ -54,7 +54,7 @@ local critter = {
             -- set the initial pattern
             local startState = love.image.newImageData(256, 256)
             local pattern = p or patterns.choices[math.random(#patterns.choices)]
-            -- local pattern = patterns.stripey
+            -- local pattern = patterns.hex
             startState:mapPixel(pattern())
             local startImage = love.graphics.newImage(startState)
             love.graphics.draw(startImage)
@@ -703,8 +703,6 @@ function love.keypressed(key, sc, isRepeat)
 
         if key == "0" then
             critter.setPattern()
-        elseif key == "9" then
-            critter.setPattern(patterns.polka)
         end
 
         -- test all states and their poses

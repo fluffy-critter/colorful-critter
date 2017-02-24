@@ -88,28 +88,27 @@ patterns.stripey = function()
     end
 end
 
-patterns.polka = function()
-    local colors = genColors(2)
+patterns.nm = function()
+    local colors = genColors(3)
     local size = math.random(2.0, 5.0)
     local distance = math.random(size*1.5, size*3.0)
     local size2 = size*size
 
     return function(x,y,r,g,b,a)
-        -- center point of the cell
-        local cx = math.floor(x/distance)*distance + distance/2
-        local cy = math.floor(y/distance)*distance + distance/2
+        local ra = x
+        local rb = x*0.8142 + y*0.5806
+        local rc = x*0.8142 - y*0.5806
 
-        local q = x - cx
-        local r = y - cy
-        local d = q*q + r*r
-        if d < size2 then
-            return unpack(colors[1])
-        else
-            return unpack(colors[2])
-        end
+        local ca = math.floor(ra/distance) % 2
+        local cb = math.floor(rb/distance) % 2
+        local cc = math.floor(rc/distance) % 2
+
+        local color = colors[(ca + cb + cc)%3 + 1]
+
+        return color[1], color[2], color[3], 255
     end
 end
 
-patterns.choices = {patterns.plaid, patterns.splotchy, patterns.random, patterns.argyle, patterns.stripey, patterns.polka}
+patterns.choices = {patterns.plaid, patterns.splotchy, patterns.random, patterns.argyle, patterns.stripey, patterns.nm}
 
 return patterns

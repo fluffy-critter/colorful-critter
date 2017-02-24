@@ -61,7 +61,7 @@ $(DEST)/.published-love: $(DEST)/love/$(NAME).love
 
 # macOS version
 osx: $(DEST)/osx/$(NAME).app
-$(DEST)/osx/$(NAME).app: $(DEST)/love/$(NAME).love $(wildcard osx/*) $(DEST)/love.app/Contents/MacOS/love
+$(DEST)/osx/$(NAME).app: $(DEST)/love/$(NAME).love $(wildcard osx/*) $(DEST)/deps/love.app/Contents/MacOS/love
 	mkdir -p $(DEST)/osx
 	rm -rf $(@)
 	cp -r "$(DEST)/love.app" $(@)
@@ -73,21 +73,27 @@ $(DEST)/.published-osx: $(DEST)/osx/$(NAME).app
 	butler push $(DEST)/osx $(TARGET):osx && touch $(@)
 
 # OSX build dependencies
-$(DEST)/love.app/Contents/MacOS/love:
-	wget -O $(DEST)/love-$(LOVE_VERSION)-macosx-x64.zip https://bitbucket.org/rude/love/downloads/love-0.10.2-macosx-x64.zip
-	cd $(DEST) && unzip love-$(LOVE_VERSION)-macosx-x64.zip
+$(DEST)/deps/love.app/Contents/MacOS/love:
+	mkdir -p $(DEST)/deps/ && \
+	cd $(DEST)/deps && \
+	wget https://bitbucket.org/rude/love/downloads/love-0.10.2-macosx-x64.zip && \
+	unzip love-$(LOVE_VERSION)-macosx-x64.zip
 
 # Windows build dependencies
-WIN32_ROOT=$(DEST)/love-$(LOVE_VERSION)-win32
-WIN64_ROOT=$(DEST)/love-$(LOVE_VERSION)-win64
+WIN32_ROOT=$(DEST)/deps/love-$(LOVE_VERSION)-win32
+WIN64_ROOT=$(DEST)/deps/love-$(LOVE_VERSION)-win64
 
 $(WIN32_ROOT)/love.exe:
-	wget -O $(DEST)/love-$(LOVE_VERSION)-win32.zip https://bitbucket.org/rude/love/downloads/love-$(LOVE_VERSION)-win32.zip
-	cd $(DEST) && unzip love-$(LOVE_VERSION)-win32.zip
+	mkdir -p $(DEST)/deps/ && \
+	cd $(DEST)/deps && \
+	wget https://bitbucket.org/rude/love/downloads/love-$(LOVE_VERSION)-win32.zip && \
+	unzip love-$(LOVE_VERSION)-win32.zip
 
 $(WIN64_ROOT)/love.exe:
-	wget -O $(DEST)/love-$(LOVE_VERSION)-win64.zip https://bitbucket.org/rude/love/downloads/love-$(LOVE_VERSION)-win64.zip
-	cd $(DEST) && unzip love-$(LOVE_VERSION)-win64.zip
+	mkdir -p $(DEST)/deps/ && \
+	cd $(DEST)/deps && \
+	wget https://bitbucket.org/rude/love/downloads/love-$(LOVE_VERSION)-win64.zip && \
+	unzip love-$(LOVE_VERSION)-win64.zip
 
 # Win32 version
 win32: $(DEST)/win32/$(NAME).exe

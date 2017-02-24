@@ -11,8 +11,8 @@ just copied into the critter object.
 
 local poses = {
     default = {
-        eyeCX = 500/4,
-        eyeCY = 172/4,
+        eyeCX = 500/2,
+        eyeCY = 172/2,
         texCoords = {
             "poses/default/uv4.png",
             "poses/default/uv3.png",
@@ -25,8 +25,8 @@ local poses = {
         halo = {},
     },
     anxious = {
-        eyeCX = 500/4,
-        eyeCY = 172/4,
+        eyeCX = 500/2,
+        eyeCY = 172/2,
         texCoords = {
             "poses/anxious/uv4.png",
             "poses/anxious/uv3.png",
@@ -39,8 +39,8 @@ local poses = {
         halo = {},
     },
     aroused = {
-        eyeCX = 500/4,
-        eyeCY = 172/4,
+        eyeCX = 500/2,
+        eyeCY = 172/2,
         texCoords = {
             "poses/aroused/uv4.png",
             "poses/aroused/uv3.png",

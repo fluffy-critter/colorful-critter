@@ -432,12 +432,17 @@ function love.update(dt)
 
     critter.eyeX = (mx - (critter.x + critter.eyeCX))/20
     critter.eyeY = (my - (critter.y + critter.eyeCY))/20
-    local eyeD = math.sqrt(critter.eyeX*critter.eyeX + critter.eyeY*critter.eyeY)
-    if eyeD > 3 then
-        critter.eyeX = critter.eyeX*3 / eyeD
-        critter.eyeY = critter.eyeY*3 / eyeD
+    -- bias upwards
+    if critter.eyeY < 0 then
+        critter.eyeY = critter.eyeY * 2
     end
-    critter.eyeY = math.min(2, critter.eyeY)
+    local eyeD = math.sqrt(critter.eyeX*critter.eyeX + critter.eyeY*critter.eyeY)
+    if eyeD > 8 then
+        critter.eyeX = critter.eyeX*8 / eyeD
+        critter.eyeY = critter.eyeY*8 / eyeD
+    end
+    critter.eyeX = math.max(-5, math.min(5, critter.eyeX))
+    critter.eyeY = math.max(-5, math.min(2, critter.eyeY))
 
     muteButton.hovering = false
     if (mx >= 768 - 32) and (mx < 768) and (my >= 512 - 32) and (my < 512) then

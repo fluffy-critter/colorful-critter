@@ -31,7 +31,7 @@ end
 local function genColors(n)
     local colors = {}
     for i=1,n do
-        colors[i] = {HSV(math.random(0, 255), 255, math.random(63, 255))}
+        colors[i] = {HSV(math.random(0, 255), 255, math.random(128,255))}
     end
     return colors
 end
@@ -41,7 +41,7 @@ patterns.plaid = function()
     local r1, g1, b1 = HSV(math.random(0, 255), 255, math.random(63, 255))
     local size = math.random(16,64)
 
-    return function(x,y,r,g,b,a)
+    return function(x,y)
         local i = x - 128
         local j = y - 128
         local mix = (math.floor((i+j)/size)%2
@@ -53,7 +53,7 @@ end
 patterns.argyle = function()
     local colors = genColors(3)
 
-    return function(x,y,r,g,b,a)
+    return function(x,y)
         local mix = (math.floor((x+y)/32)%2 + math.floor((y-x)/32)%2)
         local color = colors[mix + 1]
         return color[1], color[2], color[3], 255
@@ -63,14 +63,14 @@ end
 patterns.splotchy = function()
     local colors = genColors(math.random(2,5))
 
-    return function(x,y,r,g,b,a)
+    return function(x,y)
         local color = colors[math.random(#colors)]
         return color[1], color[2], color[3], 255
     end
 end
 
 patterns.random = function()
-    return function(x,y,r,g,b,a)
+    return function(x,y)
         return math.random(0,4)*63,math.random(0,4)*63,math.random(0,4)*63,255
     end
 end
@@ -80,7 +80,7 @@ patterns.stripey = function()
     local amp = math.random(-10.0,10.0)
     local freq = math.random(1.0,5.0)
 
-    return function(x,y,r,g,b,a)
+    return function(x,y)
         local yofs = math.cos((x-128)/freq)*amp
         local n = math.floor(((y+yofs)/32)%#colors) + 1
         local color = colors[n]
@@ -90,11 +90,9 @@ end
 
 patterns.nm = function()
     local colors = genColors(3)
-    local size = math.random(2.0, 5.0)
-    local distance = math.random(size*1.5, size*3.0)
-    local size2 = size*size
+    local distance = math.random(3.0, 15.0)
 
-    return function(x,y,r,g,b,a)
+    return function(x,y)
         local ra = x
         local rb = x*0.8142 + y*0.5806
         local rc = x*0.8142 - y*0.5806
@@ -109,6 +107,37 @@ patterns.nm = function()
     end
 end
 
-patterns.choices = {patterns.plaid, patterns.splotchy, patterns.random, patterns.argyle, patterns.stripey, patterns.nm}
+patterns.polka = function()
+    local colors = genColors(2)
+    -- local colors = {{0,0,0}, {255,255,255}}
+    local size = math.random(3.0, 5.0)
+    local distX = math.random(size*3.0, size*5.0)
+    local distY = distX*.9
+    local size2 = size*size
+
+    return function(x,y)
+        x = x - 128
+        y = y - 128
+
+        -- determine the cell number we're in on each axis
+        local i = math.floor(x/distX)
+        local j = math.floor(y/distY + (i % 2)*0.5)
+
+        -- determine the center point of the cell
+        local cx = (i + 0.5)*distX
+        local cy = (j + 0.5 - (i % 2)*0.5)*distY
+
+        -- distance from the center point
+        local dx = x - cx
+        local dy = y - cy
+
+        local color = colors[(dx*dx + dy*dy) <= size2 and 1 or 2]
+        -- local color = colors[(i+j)%2 + 1]
+
+        return color[1], color[2], color[3], 255
+    end
+end
+
+patterns.choices = {patterns.plaid, patterns.splotchy, patterns.random, patterns.argyle, patterns.stripey, patterns.nm, patterns.polka}
 
 return patterns

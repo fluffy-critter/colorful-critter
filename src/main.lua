@@ -54,7 +54,7 @@ local critter = {
             -- set the initial pattern
             local startState = love.image.newImageData(256, 256)
             local pattern = p or patterns.choices[math.random(#patterns.choices)]
-            -- local pattern = patterns.hex
+            -- local pattern = patterns.polka
             startState:mapPixel(pattern())
             local startImage = love.graphics.newImage(startState)
             love.graphics.draw(startImage)

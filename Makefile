@@ -57,8 +57,7 @@ $(DEST)/love/$(NAME).love: $(shell find src -type f) $(DEST)/.assets
 
 publish-love: $(DEST)/.published-love
 $(DEST)/.published-love: $(DEST)/love/$(NAME).love
-	butler push $(DEST)/love $(TARGET):love-bundle
-	touch $(@)
+	butler push $(DEST)/love $(TARGET):love-bundle && touch $(@)
 
 # macOS version
 osx: $(DEST)/osx/$(NAME).app
@@ -71,8 +70,7 @@ $(DEST)/osx/$(NAME).app: $(DEST)/love/$(NAME).love $(wildcard osx/*) $(DEST)/lov
 
 publish-osx: $(DEST)/.published-osx
 $(DEST)/.published-osx: $(DEST)/osx/$(NAME).app
-	butler push $(DEST)/osx $(TARGET):osx
-	touch $(@)
+	butler push $(DEST)/osx $(TARGET):osx && touch $(@)
 
 # OSX build dependencies
 $(DEST)/love.app/Contents/MacOS/love:
@@ -100,8 +98,7 @@ $(DEST)/win32/$(NAME).exe: $(WIN32_ROOT)/love.exe $(DEST)/love/$(NAME).love
 
 publish-win32: $(DEST)/.published-win32
 $(DEST)/.published-win32: $(DEST)/win32/$(NAME).exe
-	butler push $(DEST)/win32 $(TARGET):win32
-	touch $(@)
+	butler push $(DEST)/win32 $(TARGET):win32 && touch $(@)
 
 # Win64 version
 win64: $(DEST)/win64/$(NAME).exe
@@ -112,6 +109,5 @@ $(DEST)/win64/$(NAME).exe: $(WIN64_ROOT)/love.exe $(DEST)/love/$(NAME).love
 
 publish-win64: $(DEST)/.published-win64
 $(DEST)/.published-win64: $(DEST)/win64/$(NAME).exe
-	butler push $(DEST)/win64 $(TARGET):win64
-	touch $(@)
+	butler push $(DEST)/win64 $(TARGET):win64 && touch $(@)
 

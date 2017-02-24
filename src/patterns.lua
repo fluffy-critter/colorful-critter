@@ -90,13 +90,17 @@ end
 
 patterns.polka = function()
     local colors = genColors(2)
-    local size = math.random(5.0, 10.0)
-    local distance = math.random(size, size*3.0)
+    local size = math.random(2.0, 5.0)
+    local distance = math.random(size*1.5, size*3.0)
     local size2 = size*size
 
     return function(x,y,r,g,b,a)
-        local q = x % distance - distance/2
-        local r = (y*.58 - x*.81) % distance - distance/2
+        -- center point of the cell
+        local cx = math.floor(x/distance)*distance + distance/2
+        local cy = math.floor(y/distance)*distance + distance/2
+
+        local q = x - cx
+        local r = y - cy
         local d = q*q + r*r
         if d < size2 then
             return unpack(colors[1])

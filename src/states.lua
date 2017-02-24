@@ -43,7 +43,7 @@ local states = {
             -- love.sound.play("sigh")
         end),
         nextState = (function(c)
-            if c.anxiety > 10 or c.itchy > 10 then
+            if c.anxiety > 50 then
                 return "default"
             elseif c.estrus > 1.0 then
                 return "aroused"
@@ -86,6 +86,8 @@ local states = {
                 return "angry"
             elseif c.estrus < 0.5 and c.itchy > 10 then
                 return "frustrated"
+            elseif c.estrus < 1.0 and c.itchy > 8 then
+                return "squirm"
             end
         end)
     },
@@ -117,13 +119,13 @@ local states = {
     },
 
     itchy = {
-        pose = "anxious",
+        pose = "squirm",
         nextState = (function(c)
             if c.anxiety > 200 or c.estrus > 0.8 then
                 return "frustrated"
             elseif c.itchy > 10 and c.anxiety > 80 then
                 return "angry"
-            elseif c.itchy < 1 then
+            elseif c.itchy < 5 then
                 return "default"
             end
         end)
@@ -205,9 +207,10 @@ local states = {
     },
 
     squirm = {
+        pose = "squirm",
         nextState = (function(c)
-            if c.anxiety < 25 and c.itchy < 8 then
-                return "refractory"
+            if c.anxiety < 25 and c.itchy < 1 then
+                return "default"
             end
         end)
     }

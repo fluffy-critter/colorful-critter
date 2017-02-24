@@ -71,7 +71,7 @@ end
 
 patterns.random = function()
     return function(x,y)
-        return math.random(0,4)*63,math.random(0,4)*63,math.random(0,4)*63,255
+        return math.random(1,4)*63,math.random(1,4)*63,math.random(1,4)*63,255
     end
 end
 

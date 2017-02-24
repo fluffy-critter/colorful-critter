@@ -420,12 +420,7 @@ local function pumpStateGraph(critter)
         end
     until not nextState
 
-    if nextPose then
-        if DEBUG then
-            print("nextPose=" .. nextPose)
-        end
-        setPose(poses[nextPose])
-    end
+    return nextPose
 end
 
 function love.update(dt)
@@ -673,7 +668,13 @@ function love.update(dt)
     end
 
     -- finally, evaluate the state transitions
-    pumpStateGraph(critter)
+    local nextPose = pumpStateGraph(critter)
+    if nextPose then
+        if DEBUG then
+            print("nextPose=" .. nextPose)
+        end
+        setPose(poses[nextPose])
+    end
 end
 
 local _debug = {
@@ -753,7 +754,7 @@ function love.keypressed(key, sc, isRepeat)
             local transitions = {}
             for state,_ in pairs(states) do
                 print("testing state " .. state)
-                for n = 1,100 do
+                for n = 1,1000 do
                     local e=math.random()*2.1
                     local i=math.random()*20
                     local a=math.random()*200

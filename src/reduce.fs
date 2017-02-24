@@ -19,7 +19,7 @@ vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) 
     float counts[9];
     int allocated = 0;
 
-    float maxCount = 0;
+    float maxCount = 0.0;
     vec4 maxColor;
 
     // TODO: unroll? seems to perform fine, at least on my Mac Pro...

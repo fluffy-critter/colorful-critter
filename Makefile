@@ -64,8 +64,8 @@ osx: $(DEST)/osx/$(NAME).app
 $(DEST)/osx/$(NAME).app: $(DEST)/love/$(NAME).love $(wildcard osx/*) $(DEST)/deps/love.app/Contents/MacOS/love
 	mkdir -p $(DEST)/osx
 	rm -rf $(@)
-	cp -r "$(DEST)/love.app" $(@)
-	cp osx/Info.plist $(@)/Contents
+	cp -r "$(DEST)/deps/love.app" $(@) && \
+	cp osx/Info.plist $(@)/Contents && \
 	cp $(DEST)/love/$(NAME).love $(@)/Contents/Resources
 
 publish-osx: $(DEST)/.published-osx

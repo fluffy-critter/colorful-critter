@@ -58,8 +58,22 @@ local states = {
         nextState = (function(c)
             if c.anxiety < 80 and c.estrus <= 1.0 then
                 return "default"
+            elseif c.itchy > 9 then
+                return "angry"
             elseif c.estrus > 0.5 then
                 return "frustrated"
+            end
+        end)
+    },
+
+    angry = {
+        nextState = (function(c)
+            if c.estrus > 1.3 then
+                return "frustrated"
+            elseif c.itchy < 0.5 then
+                return "relaxed"
+            elseif c.anxiety < 70 then
+                return "default"
             end
         end)
     },

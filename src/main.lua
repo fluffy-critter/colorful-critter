@@ -49,11 +49,11 @@ local critter = {
     resetFrames = 0,
     resetCount = 1,
 
-    setPattern = function()
+    setPattern = function(p)
          skin.front:renderTo(function()
             -- set the initial pattern
             local startState = love.image.newImageData(256, 256)
-            local pattern = patterns.choices[math.random(#patterns.choices)]
+            local pattern = p or patterns.choices[math.random(#patterns.choices)]
             -- local pattern = patterns.stripey
             startState:mapPixel(pattern())
             local startImage = love.graphics.newImage(startState)
@@ -703,6 +703,8 @@ function love.keypressed(key, sc, isRepeat)
 
         if key == "0" then
             critter.setPattern()
+        elseif key == "9" then
+            critter.setPattern(patterns.polka)
         end
 
         -- test all states and their poses

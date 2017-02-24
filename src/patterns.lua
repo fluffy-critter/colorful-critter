@@ -88,6 +88,24 @@ patterns.stripey = function()
     end
 end
 
-patterns.choices = {patterns.plaid, patterns.splotchy, patterns.random, patterns.argyle, patterns.stripey}
+patterns.polka = function()
+    local colors = genColors(2)
+    local size = math.random(5.0, 10.0)
+    local distance = math.random(size, size*3.0)
+    local size2 = size*size
+
+    return function(x,y,r,g,b,a)
+        local q = x % distance - distance/2
+        local r = (y*.58 - x*.81) % distance - distance/2
+        local d = q*q + r*r
+        if d < size2 then
+            return unpack(colors[1])
+        else
+            return unpack(colors[2])
+        end
+    end
+end
+
+patterns.choices = {patterns.plaid, patterns.splotchy, patterns.random, patterns.argyle, patterns.stripey, patterns.polka}
 
 return patterns

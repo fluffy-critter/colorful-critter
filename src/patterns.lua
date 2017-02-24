@@ -111,13 +111,19 @@ patterns.polka = function()
     local colors = genColors(2)
     -- local colors = {{0,0,0}, {255,255,255}}
     local size = math.random(3.0, 5.0)
-    local distX = math.random(size*3.0, size*5.0)
+    local distX = math.random(size*4.0, size*5.0)
     local distY = distX*.9
     local size2 = size*size
+    local angle = math.random(0, 6.283)
+    local cosA = math.cos(angle)
+    local sinA = math.sin(angle)
 
-    return function(x,y)
-        x = x - 128
-        y = y - 128
+    return function(u,v)
+        u = u - 128
+        v = v - 128
+
+        local x = u*cosA + v*sinA
+        local y = v*cosA - u*sinA
 
         -- determine the cell number we're in on each axis
         local i = math.floor(x/distX)
@@ -132,7 +138,6 @@ patterns.polka = function()
         local dy = y - cy
 
         local color = colors[(dx*dx + dy*dy) <= size2 and 1 or 2]
-        -- local color = colors[(i+j)%2 + 1]
 
         return color[1], color[2], color[3], 255
     end

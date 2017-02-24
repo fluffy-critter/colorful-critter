@@ -186,9 +186,10 @@ function love.load()
     skin.front = love.graphics.newCanvas(256, 256)
     skin.front:setFilter("nearest", "nearest")
     skin.back = love.graphics.newCanvas(256, 256)
-    skin.front:setFilter("nearest", "nearest")
+    skin.back:setFilter("nearest", "nearest")
 
     critter.setPattern()
+    critter.skin = skin
 
     -- initialize the jiggler texture
     skin.jigglerData = love.image.newImageData(256, 256)
@@ -747,14 +748,15 @@ function love.keypressed(key, sc, isRepeat)
                 end
             end
         elseif key == "`" then
-            -- test the state machine
-            seenStates = {}
+            -- smoketest the state machine
+            local seenStates = {}
+            local transitions = {}
             for state,_ in pairs(states) do
                 print("testing state " .. state)
                 for n = 1,100 do
-                    local e=math.random(0.0,3.0)
-                    local i=math.random(0.0,20.0)
-                    local a=math.random(0.0,200.0)
+                    local e=math.random()*2.1
+                    local i=math.random()*20
+                    local a=math.random()*200
                     print(state, n, e, i, a)
                     critter.state = state
                     critter.anxiety = a
@@ -762,10 +764,18 @@ function love.keypressed(key, sc, isRepeat)
                     critter.estrus = e
                     pumpStateGraph(critter)
                     seenStates[critter.state] = true
+                    transitions[state] = transitions[state] or {}
+                    transitions[state][critter.state] = true
                 end
             end
             for state,_ in pairs(states) do
-                print("state " .. ": " .. (seenStates[state] and "found" or "NOT FOUND"))
+                print("state " .. state .. ": " .. (seenStates[state] and "found" or "NOT FOUND"))
+            end
+            for state,tlist in pairs(transitions) do
+                print ("start " .. state)
+                for dest,_ in pairs(tlist) do
+                    print ("    -> " .. dest)
+                end
             end
         end
     end

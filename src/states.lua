@@ -45,7 +45,7 @@ local states = {
         nextState = (function(c)
             if c.anxiety > 10 or c.itchy > 10 then
                 return "default"
-            elseif c.estrus > 0.8 then
+            elseif c.estrus > 1.0 then
                 return "aroused"
             elseif c.itchy > 10 then
                 return "itchy"
@@ -84,7 +84,7 @@ local states = {
                 return "orgasm"
             elseif c.anxiety > 100 then
                 return "angry"
-            elseif c.estrus < 0.5 or c.itchy > 10 then
+            elseif c.estrus < 0.5 and c.itchy > 10 then
                 return "frustrated"
             end
         end)
@@ -105,6 +105,9 @@ local states = {
         pose = "hyperorgasm",
         onEnterState = (function(c)
             c.haloBright = 0.0
+            -- really cool effect I stumbled across accidentally :)
+            c.skin.front:setFilter("linear", "linear")
+            c.skin.back:setFilter("linear", "linear")
         end),
         nextState = (function(c)
             if c.estrus < 1.0 then
@@ -183,6 +186,8 @@ local states = {
         onEnterState = (function(c)
             c.resetFrames = 0
             c.resetCount = 1
+            c.skin.front:setFilter("nearest", "nearest")
+            c.skin.back:setFilter("nearest", "nearest")
         end),
         nextState = (function(c)
             c.resetFrames = c.resetFrames + 1

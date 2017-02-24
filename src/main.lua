@@ -730,6 +730,8 @@ function love.keypressed(key, sc, isRepeat)
             setPose(poses.hyperrefractory)
         elseif key == "g" then
             setPose(poses.angry)
+        elseif key == "z" then
+            setPose(poses.squirm)
         end
 
         if key == "0" then

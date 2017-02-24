@@ -156,6 +156,22 @@ local poses = {
         pupils = {},
         halo =  {"poses/relaxed/refractory-halo.png"},
     },
+    squirm = {
+        eyeCX = 500/2,
+        eyeCY = 172/2,
+        eyeMinY = -2,
+        eyeMaxY = 2,
+        texCoords = {
+            "poses/squirm/uv4.png",
+            "poses/squirm/uv3.png",
+            "poses/squirm/uv2.png",
+            "poses/squirm/uv1.png"
+            },
+        overlays = {"poses/squirm/overlay.png"},
+        blush = {"poses/squirm/blush.png"},
+        pupils = {"poses/squirm/pupils.png"},
+        halo = {},
+    },
 }
 
 return poses

@@ -19,6 +19,9 @@
 # itch.io target
 TARGET="fluffy/colorful-critter"
 
+# game directory
+SRC=src
+
 # build directory
 DEST=build
 
@@ -51,9 +54,9 @@ $(DEST)/.assets: $(shell find raw_assets -name '*.png' -or -name '*.wav')
 
 # .love bundle
 love-bundle: $(DEST)/love/$(NAME).love
-$(DEST)/love/$(NAME).love: $(shell find src -type f) $(DEST)/.assets
-	mkdir -p $(DEST)/love
-	cd src && zip -9r ../$(@) .
+$(DEST)/love/$(NAME).love: $(shell find $(SRC) -type f) $(DEST)/.assets
+	mkdir -p $(DEST)/love && \
+	cd $(SRC) && zip -9r ../$(@) .
 
 publish-love: $(DEST)/.published-love
 $(DEST)/.published-love: $(DEST)/love/$(NAME).love

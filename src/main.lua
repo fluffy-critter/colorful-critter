@@ -222,8 +222,8 @@ function love.draw()
     local cy = critter.y
     if critter.estrus > 1.5 then
         local vib = (critter.estrus - 1.5)*(critter.estrus - 1)*2
-        cx = cx + math.random(-vib, vib)
-        cy = cy + math.random(-vib, vib)
+        cx = cx + math.random()*2*vib - vib
+        cy = cy + math.random()*2*vib - vib
     end
 
     screen.canvas:renderTo(function()
@@ -274,9 +274,10 @@ function love.draw()
         shaders.remap:send("referred", skin.front)
         critter.canvas:renderTo(function()
             -- skin layers
-            for _,tc in pairs(critter.texCoords) do
-                love.graphics.draw(tc, cx, cy)
-            end
+            -- for _,tc in pairs(critter.texCoords) do
+            --     love.graphics.draw(tc, cx, cy)
+            -- end
+            love.graphics.draw(critter.pose)
         end)
 
         -- draw the outline

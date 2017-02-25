@@ -130,11 +130,16 @@ local function blitCanvas(canvas)
     canvasPosition.srcH = canvasHeight
 end
 
+local imageCache = {}
+
 local function setPose(pose)
     function loadAssets(tbl)
         local out = {}
         for idx,path in pairs(tbl) do
-            out[idx] = love.graphics.newImage("assets/" .. path)
+            if not imageCache[path] then
+                imageCache[path] = love.graphics.newImage("assets/" .. path)
+            end
+            out[idx] = imageCache[path]
         end
         return out
     end
@@ -195,6 +200,11 @@ function love.load()
     skin.jigglerData = love.image.newImageData(256, 256)
     skin.jigglerImage = love.graphics.newImage(skin.jigglerData)
     skin.jigglerImage:setFilter("nearest", "nearest")
+
+    -- preload all the poses
+    for _,p in pairs(poses) do
+        setPose(p)
+    end
 
     setPose(poses.default)
 

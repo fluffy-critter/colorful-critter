@@ -28,6 +28,8 @@ local muteButton = {
 
 local skin = {}
 
+local paintOverlay = {}
+
 local critter = {
     anxiety = 10,   -- pointer movement without being touched
     itchy = 3,      -- not being touched
@@ -172,8 +174,6 @@ function love.load()
 
     screen.canvas = love.graphics.newCanvas(768, 512)
     screen.canvas:setFilter("nearest", "nearest")
-
-    screen.paintOverlay = love.graphics.newCanvas(768, 512)
 
     screen.colorPicker = love.image.newImageData("assets/gradient.png")
     screen.colorPickerImage = love.graphics.newImage(screen.colorPicker)
@@ -329,9 +329,14 @@ function love.draw()
         end
 
         -- draw the paint overlay
-        love.graphics.setBlendMode("alpha", "alphamultiply")
-        love.graphics.setColor(255,255,255)
-        love.graphics.draw(screen.paintOverlay)
+        if paintOverlay.draw then
+            love.graphics.setColor(unpack(paintOverlay.color))
+            love.graphics.ellipse("fill", paintOverlay.x, paintOverlay.y, paintOverlay.radius*2, paintOverlay.radius*2)
+            if paintOverlay.line then
+                drawThickLine(paintOverlay.x, paintOverlay.y, paintOverlay.radius*2,
+                    paintOverlay.prevX, paintOverlay.prevY, paintOverlay.prevRadius*2)
+            end
+        end
 
         if DEBUG then
             love.graphics.setColor(255, 255, 255)
@@ -469,11 +474,6 @@ function love.update(dt)
     reduceChromatophores(skin.front, skin.back, 0, 0, 256, 256)
     skin.front,skin.back = skin.back,skin.front
 
-    -- clear the paint overlay
-    screen.paintOverlay:renderTo(function()
-        love.graphics.clear(0,0,0,0)
-    end)
-
     -- handle mouse controls
     local mx = (love.mouse.getX() - canvasPosition.x)*canvasPosition.srcW/canvasPosition.destW
     local my = (love.mouse.getY() - canvasPosition.y)*canvasPosition.srcH/canvasPosition.destH
@@ -490,6 +490,7 @@ function love.update(dt)
     local deltaX = pen.x - prevX
     local deltaY = pen.y - prevY
     local distance = math.sqrt(deltaX*deltaX + deltaY*deltaY)/2
+    paintOverlay.draw = false
 
     critter.eyeX = (mx - (critter.x + critter.eyeCX))/20
     critter.eyeY = (my - (critter.y + critter.eyeCY))/20
@@ -535,16 +536,6 @@ function love.update(dt)
         if prevDrawing then
             pen.radius = pen.radius/math.max(1,distance/4)
         end
-
-        -- paint into the paint overlay texture
-        screen.paintOverlay:renderTo(function()
-            love.graphics.setColor(unpack(pen.color))
-
-            love.graphics.ellipse("fill", pen.x, pen.y, pen.radius*2, pen.radius*2)
-            if prevDrawing then
-                drawThickLine(pen.x, pen.y, pen.radius*2, prevX, prevY, prevRadius*2)
-            end
-        end)
 
         -- unshift the color for the painting
         local rotU = math.cos(-critter.hueshift)
@@ -592,7 +583,19 @@ function love.update(dt)
             prevDrawing = false
         end
 
-        -- redraw the pen stroke into the skin buffer
+        -- set up the paint overlay
+        paintOverlay.draw = true
+        paintOverlay.color = pen.color
+        paintOverlay.x = pen.x
+        paintOverlay.y = pen.y
+        paintOverlay.radius = pen.radius
+        if prevDrawing then
+            paintOverlay.prevX = prevX
+            paintOverlay.prevY = prevY
+            paintOverlay.prevRadius = prevRadius
+        end
+
+        -- draw the pen stroke into the skin buffer
         skin.front:renderTo(function()
             love.graphics.setColor(unpack(unshiftColor))
 

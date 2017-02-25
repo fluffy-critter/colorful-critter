@@ -28,7 +28,7 @@ local muteButton = {
 
 local skin = {}
 
-local paintOverlay = {}
+local paintStrokes = {}
 
 local critter = {
     anxiety = 10,   -- pointer movement without being touched
@@ -133,6 +133,19 @@ local function blitCanvas(canvas)
 end
 
 local imageCache = {}
+
+local function drawThickLine(x0, y0, r0, x1, y1, r1)
+    local deltaX = x1 - x0
+    local deltaY = y1 - y0
+    local distance = math.sqrt(deltaX*deltaX + deltaY*deltaY)
+    local px, py = deltaY/distance, -deltaX/distance
+    love.graphics.polygon("fill",
+        x0 + px*r0, y0 + py*r0,
+        x0 - px*r0, y0 - py*r0,
+        x1 - px*r1, y1 - py*r1,
+        x1 + px*r1, y1 + py*r1
+        )
+end
 
 local function setPose(pose)
     function loadAssets(tbl)
@@ -329,15 +342,20 @@ function love.draw()
             love.graphics.setShader()
         end
 
-        -- draw the paint overlay
-        if paintOverlay.draw then
-            love.graphics.setColor(unpack(paintOverlay.color))
-            love.graphics.ellipse("fill", paintOverlay.x, paintOverlay.y, paintOverlay.radius*2, paintOverlay.radius*2)
-            if paintOverlay.line then
-                drawThickLine(paintOverlay.x, paintOverlay.y, paintOverlay.radius*2,
-                    paintOverlay.prevX, paintOverlay.prevY, paintOverlay.prevRadius*2)
+        -- draw the paint stroke queue
+        local prevInk
+        for _,ink in ipairs(paintStrokes) do
+            if ink.color then
+                love.graphics.setColor(unpack(ink.color))
+                love.graphics.ellipse("fill", ink.x, ink.y, ink.radius*2, ink.radius*2)
+                if prevInk and prevInk.radius then
+                    drawThickLine(ink.x, ink.y, ink.radius*2,
+                        prevInk.x, prevInk.y, prevInk.radius*2)
+                end
             end
+            prevInk = ink
         end
+        paintStrokes = {prevInk}
 
         if DEBUG then
             love.graphics.setColor(255, 255, 255)
@@ -378,19 +396,6 @@ local function reduceChromatophores(front, back, x, y, w, h)
         love.graphics.draw(front)
         love.graphics.setShader()
     end)
-end
-
-local function drawThickLine(x0, y0, r0, x1, y1, r1)
-    local deltaX = x1 - x0
-    local deltaY = y1 - y0
-    local distance = math.sqrt(deltaX*deltaX + deltaY*deltaY)
-    local px, py = deltaY/distance, -deltaX/distance
-    love.graphics.polygon("fill",
-        x0 + px*r0, y0 + py*r0,
-        x0 - px*r0, y0 - py*r0,
-        x1 - px*r1, y1 - py*r1,
-        x1 + px*r1, y1 + py*r1
-        )
 end
 
 local function pumpStateGraph(critter)
@@ -491,7 +496,6 @@ function love.update(dt)
     local deltaX = pen.x - prevX
     local deltaY = pen.y - prevY
     local distance = math.sqrt(deltaX*deltaX + deltaY*deltaY)/2
-    paintOverlay.draw = false
 
     critter.eyeX = (mx - (critter.x + critter.eyeCX))/20
     critter.eyeY = (my - (critter.y + critter.eyeCY))/20
@@ -585,16 +589,12 @@ function love.update(dt)
         end
 
         -- set up the paint overlay
-        paintOverlay.draw = true
-        paintOverlay.color = pen.color
-        paintOverlay.x = pen.x
-        paintOverlay.y = pen.y
-        paintOverlay.radius = pen.radius
-        if prevDrawing then
-            paintOverlay.prevX = prevX
-            paintOverlay.prevY = prevY
-            paintOverlay.prevRadius = prevRadius
-        end
+        table.insert(paintStrokes, {
+            x = pen.x,
+            y = pen.y,
+            radius = pen.radius,
+            color = pen.color
+        })
 
         -- draw the pen stroke into the skin buffer
         skin.front:renderTo(function()
@@ -605,6 +605,10 @@ function love.update(dt)
                 drawThickLine(pen.skinX, pen.skinY, pen.radius, prevSX, prevSY, prevRadius)
             end
         end)
+    end
+
+    if not pen.drawing then
+        table.insert(paintStrokes, {})
     end
 
     if muteButton.state == "out" then

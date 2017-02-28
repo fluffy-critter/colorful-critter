@@ -56,7 +56,9 @@ $(DEST)/.assets: $(shell find raw_assets -name '*.png' -or -name '*.wav')
 love-bundle: $(DEST)/love/$(NAME).love
 $(DEST)/love/$(NAME).love: $(shell find $(SRC) -type f) $(DEST)/.assets
 	mkdir -p $(DEST)/love && \
-	cd $(SRC) && zip -9r ../$(@) .
+	cd $(SRC) && \
+	rm -f ../$(@) && \
+	zip -9r ../$(@) .
 
 publish-love: $(DEST)/.published-love
 $(DEST)/.published-love: $(DEST)/love/$(NAME).love

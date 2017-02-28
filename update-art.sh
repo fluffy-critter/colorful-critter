@@ -18,7 +18,7 @@ find . -name '*.png' -type f | grep -v 'uv' | while read fname ; do
     mkdir -p $outdir
     if [ "$fname" -nt "$outfile" ] ; then
         printf "%s -> %s\n" $fname $outfile
-        convert -resize 512x512 $fname $outfile
+        convert $fname -resize 512x512 $outfile
     fi
 done
 
@@ -40,7 +40,7 @@ build_uvmap() {
 
         cmd=""
         for f in $infiles ; do
-            cmd="$cmd ( -resize 512x512 -channel alpha -threshold 50% $f )"
+            cmd="$cmd ( $f -resize 512x512 -channel alpha -threshold 50% )"
         done
 
         convert -background transparent $cmd -flatten $outfile

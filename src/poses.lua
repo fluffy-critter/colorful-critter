@@ -16,10 +16,7 @@ local poses = {
         eyeMinY = -5,
         eyeMaxY = 2,
         texCoords = {
-            "poses/default/uv4.png",
-            "poses/default/uv3.png",
-            "poses/default/uv2.png",
-            "poses/default/uv1.png"
+            "poses/default/uvmap.png",
             },
         overlays = {"poses/default/overlay.png"},
         blush = {"poses/default/blush.png"},
@@ -32,10 +29,7 @@ local poses = {
         eyeMinY = -5,
         eyeMaxY = 2,
         texCoords = {
-            "poses/anxious/uv4.png",
-            "poses/anxious/uv3.png",
-            "poses/anxious/uv2.png",
-            "poses/anxious/uv1.png"
+            "poses/anxious/uvmap.png",
             },
         overlays = {"poses/anxious/overlay.png"},
         blush = {"poses/anxious/blush.png"},
@@ -48,10 +42,7 @@ local poses = {
         eyeMinY = -2,
         eyeMaxY = 2,
         texCoords = {
-            "poses/angry/uv4.png",
-            "poses/angry/uv3.png",
-            "poses/angry/uv2.png",
-            "poses/angry/uv1.png"
+            "poses/angry/uvmap.png",
             },
         overlays = {"poses/angry/overlay.png"},
         blush = {"poses/angry/blush.png"},
@@ -64,10 +55,7 @@ local poses = {
         eyeMinY = -5,
         eyeMaxY = 2,
         texCoords = {
-            "poses/aroused/uv4.png",
-            "poses/aroused/uv3.png",
-            "poses/aroused/uv2.png",
-            "poses/aroused/uv1.png"
+            "poses/aroused/uvmap.png",
             },
         overlays = {"poses/aroused/overlay.png"},
         blush = {"poses/aroused/blush.png"},
@@ -76,10 +64,7 @@ local poses = {
     },
     orgasm = {
         texCoords = {
-            "poses/aroused/uv4.png",
-            "poses/aroused/uv3.png",
-            "poses/aroused/uv2.png",
-            "poses/aroused/orgasm-uv1.png"
+            "poses/aroused/orgasm-uvmap.png",
             },
         overlays = {"poses/aroused/orgasm-overlay.png"},
         blush = {"poses/aroused/blush.png"},
@@ -88,10 +73,7 @@ local poses = {
     },
     hyperorgasm = {
         texCoords = {
-            "poses/aroused/uv4.png",
-            "poses/aroused/uv3.png",
-            "poses/aroused/uv2.png",
-            "poses/aroused/hyperorgasm-uv1.png"
+            "poses/aroused/hyperorgasm-uvmap.png"
             },
         overlays = {"poses/aroused/hyperorgasm-overlay.png"},
         blush = {"poses/aroused/blush.png"},
@@ -100,10 +82,7 @@ local poses = {
     },
     frustrated = {
         texCoords = {
-            "poses/frustrated/uv4.png",
-            "poses/frustrated/uv3.png",
-            "poses/frustrated/uv2.png",
-            "poses/frustrated/uv1.png"
+            "poses/frustrated/uvmap.png"
             },
         overlays = {"poses/frustrated/overlay.png"},
         blush = {"poses/frustrated/blush.png"},
@@ -112,10 +91,7 @@ local poses = {
     },
     relaxed = {
         texCoords = {
-            "poses/relaxed/uv4.png",
-            "poses/relaxed/uv3.png",
-            "poses/relaxed/uv2.png",
-            "poses/relaxed/uv1.png"
+            "poses/relaxed/uvmap.png"
             },
         overlays = {"poses/relaxed/overlay.png"},
         blush = {"poses/relaxed/blush.png"},
@@ -124,10 +100,7 @@ local poses = {
     },
     refractory = {
         texCoords = {
-            "poses/relaxed/uv4.png",
-            "poses/relaxed/uv3.png",
-            "poses/relaxed/uv2.png",
-            "poses/relaxed/uv1.png"
+            "poses/relaxed/uvmap.png"
             },
         overlays = {
             "poses/relaxed/overlay.png",
@@ -141,10 +114,7 @@ local poses = {
     },
     hyperrefractory = {
         texCoords = {
-            "poses/relaxed/uv4.png",
-            "poses/relaxed/uv3.png",
-            "poses/relaxed/uv2.png",
-            "poses/relaxed/uv1.png"
+            "poses/relaxed/uvmap.png"
             },
         overlays = {
             "poses/relaxed/overlay.png",
@@ -162,10 +132,7 @@ local poses = {
         eyeMinY = -2,
         eyeMaxY = 2,
         texCoords = {
-            "poses/squirm/uv4.png",
-            "poses/squirm/uv3.png",
-            "poses/squirm/uv2.png",
-            "poses/squirm/uv1.png"
+            "poses/squirm/uvmap.png"
             },
         overlays = {"poses/squirm/overlay.png"},
         blush = {"poses/squirm/blush.png"},

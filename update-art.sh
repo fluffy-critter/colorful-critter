@@ -67,7 +67,7 @@ find . -name '*.png' -type f | while read fname ; do
     mkdir -p $outdir
     if [ "$fname" -nt "$outfile" ] ; then
         printf "%s -> %s\n" $fname $outfile
-        convert -resize 32x32 $fname $outfile
+        convert $fname -resize 32x32 -quantize transparent +dither -colors 256 $outfile
     fi
 done
 

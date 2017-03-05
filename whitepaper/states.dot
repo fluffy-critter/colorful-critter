@@ -1,0 +1,59 @@
+digraph g {
+
+    default [shape=box];
+    default -> aroused [label="e > 0.8"];
+    default -> relaxed [label="a < 5 && i < 5"];
+    default -> anxious [label="a > 70"];
+    default -> itchy [label="i > 8"];
+
+    relaxed [shape=box];
+    relaxed -> default [label="a > 50"];
+    relaxed -> aroused [label="e > 1.0"];
+    relaxed -> itchy [label="i > 10"];
+
+    anxious [shape=box];
+    anxious -> default [label="a < 50 && e < 1.0"];
+    anxious -> angry [label="i > 9"];
+    anxious -> frustrated [label="e > 0.5"];
+
+    angry [shape=box];
+    angry -> frustrated [label="e > 1.3"];
+    angry -> default [label="i < 0.5 && a < 70"];
+
+    aroused [shape=box];
+    aroused -> orgasm [label="e > 1.5"];
+    aroused -> angry [label="a > 100"];
+    aroused -> frustrated [label="e < 0.5 && i > 10"];
+    aroused -> squirm [label="e < 1.0 && i > 8"];
+
+    orgasm [shape=box];
+    orgasm -> refractory [label="e < 0.9"];
+    orgasm -> hyperorgasm [label="e > 2.0"];
+
+    hyperorgasm [shape=box];
+    hyperorgasm -> hyperrefractory [label="e < 1.0"];
+
+    itchy [shape=box,label="itchy\n(pose=squirm)"];
+    itchy -> frustrated [label="a > 200 || e > 0.8"];
+    itchy -> angry [label="i > 10 && a > 80"];
+    itchy -> default [label="i < 5"];
+
+    frustrated [shape=box];
+    frustrated -> orgasm [label="e > 1.8"];
+    frustrated -> aroused [label="e > 1.0 && a < 50"];
+    frustrated -> default [label="a < 30 && i < 3"];
+
+    refractory [shape=box];
+    refractory -> squirm [label="a > 100 || i > 18"];
+    refractory -> resetting [label="e < 0.3"];
+
+    hyperrefractory [shape=box];
+    hyperrefractory -> hyperresetting [label="e < 0.08"];
+
+    resetting -> relaxed [label="e < 0.1"];
+
+    hyperresetting -> relaxed [label="e < 0.03"];
+
+    squirm [shape=box];
+    squirm -> default [label="a < 25 && i < 1"];
+}

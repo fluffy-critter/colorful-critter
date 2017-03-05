@@ -122,3 +122,10 @@ publish-win64: $(DEST)/.published-win64
 $(DEST)/.published-win64: $(DEST)/win64/$(NAME).exe
 	butler push $(DEST)/win64 $(TARGET):win64 && touch $(@)
 
+
+publish-whitepaper: $(DEST)/.published-whitepaper
+$(DEST)/.published-whitepaper: whitepaper/index.html
+	butler push whitepaper $(TARGET):whitepaper && touch $(@)
+
+whitepaper/index.html: whitepaper/index.md
+	markdown $(^) > $(@)

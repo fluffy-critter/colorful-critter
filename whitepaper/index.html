@@ -1,0 +1,170 @@
+<p><!DOCTYPE html><html><head>
+<meta charset="utf8">
+<title>Colorful Critter: Technical Overview</title>
+</head>
+<body></p>
+
+<h1>Colorful Critter: Technical Overview</h1>
+
+<p><a href="http://fluffy.itch.io/colorful-critter">Colorful Critter</a> is a game I made over the course of one week as part of a game jam.</p>
+
+<h2>Motivation</h2>
+
+<p>As a kid I enjoyed making weird little experimental games all the time, but aside from a year at Ubisoft I'd not really been doing any game development for quite some time. So when I decided to go indie in January I realized I needed to start with something simple. Fortunately, <a href="http://eev.ee">eevee</a> was running a <a href="http://itch.io/jam/strawberry-jam">game jam</a> with a theme I appreciated at just the right time for me to join in.</p>
+
+<p>I had quite a few ideas for a theme-fitting game, but I had just had <a href="https://en.wikipedia.org/wiki/Sex_reassignment_surgery">GRS</a> at the end of January and didn't have a lot of energy or attention to work on things, so I knew I had to keep it simple. Part of my surgery recovery had me thinking of my body as something of a tamagotchi, needing the right sorts of stimulation at the right time to keep myself from going crazy; one of my working ideas was called "Tamacrotchi" and was based specifically on what I was doing for my recovery.</p>
+
+<p>But, that wasn't really a <em>horny</em> game, it was just something about genitals. My One Big Thing is enjoying colors and patterns, especially kitschy things as applied to skin (plaid, polka dots, paisley, that sort of thing), and I decided what would really work for me was a tamagotchi-type thing where the main interaction was by coloring a "critter," which is the name I use for the generic I-don't-know-what-this-is creature that I portray myself as in <a href="http://beesbuzz.biz/d/cat-journal.php">my comics</a> and Internet presence and so on.</p>
+
+<p>Note that this isn't described in the order that I developed things; it's important to understand that like many game jams, I didn't have a clear idea of how I was going to do things up front and I improvised and experimented as I went.</p>
+
+<p>Also, I invite you to crack open the LÖVE bundle file to look at the source code and assets! Please be mindful of my copyright, of course, but I'd love for people to be able to learn from this experiment. The LÖVE bundle can be decompressed with any tool that can decompress .zip files.</p>
+
+<h2>Gameplay ideal</h2>
+
+<p>My specific goal for the gameplay was that people would just start coloring the critter and then discover that it has responsive behaviors based on how it's being interacted with. I didn't want the underlying model to be too obvious, and I wanted it to be able to be temperamental but never to get stuck permanently in a state where you couldn't make it do something else.</p>
+
+<p>I also wanted there to be something that felt like a "success" condition, but nothing that felt like a termination to the experience. I also wanted it to be somewhat like the classic Tamagotchi, such that the critter had a mood and the feeling that one should treat it in certain ways during those different moods.</p>
+
+<p>In playtesting, I found that if I left the debug information visible, people would focus too much on that and just try to hit as many internal states as possible or try to maximize a particular state variable, without actually paying attention to the critter. This was anathema to the experience I wanted.</p>
+
+<p>Most of all I just wanted people to have fun trying to color the critter in whatever way they wanted, and then perceive that the critter has its own biases for how it should be colored. Having people then attempt to tease the critter in different ways would be a bonus emergent interaction.</p>
+
+<h2>Critter State</h2>
+
+<p>The critter itself is made of three parts, code-wise: there's a set of "gauges" (not the best term, but it was the internal terminology for a similar concept on <a href="https://en.wikipedia.org/wiki/Sprung_(video_game">Sprung</a>) and it's mentally stuck for me), a behavior graph (state machine) that is driven by those, and a pose (selected by the behavior graph). The gauges are as follows:</p>
+
+<ul>
+<li>Anxiety: increases as the mouse moves while the critter isn't being touched</li>
+<li>Itchy: increases while the critter isn't being touched</li>
+<li>Estrus: increases as the mouse moves while the critter is being touched</li>
+</ul>
+
+<p>The critter being touched is defined as the mouse button being held down while the mouse is over a pixel that corresponds to skin. The various gauges also have different damping factors which were basically just tinkered with as I balanced the gameplay.</p>
+
+<p>Every state has a function that maps the current gauge state into what state to transition into; for example, here's the state machine entry for the default state:</p>
+
+<pre><code>default = {
+    pose = "default",
+    nextState = (function(c)
+        if c.estrus &gt; 0.8 then
+            return "aroused"
+        elseif c.anxiety &lt; 5 and c.itchy &lt; 5 then
+            return "relaxed"
+        elseif c.anxiety &gt; 70 then
+            return "anxious"
+        elseif c.itchy &gt; 8 then
+            return "itchy"
+        end
+    end)
+},
+</code></pre>
+
+<p>States can also have a bit more advanced behavior in them; for example, this is the "resetting" state:</p>
+
+<pre><code>resetting = {
+    onEnterState = (function(c)
+        c.resetFrames = 0
+        c.resetCount = 1
+        c.skin.front:setFilter("nearest", "nearest")
+        c.skin.back:setFilter("nearest", "nearest")
+    end),
+    nextState = (function(c)
+        c.resetFrames = c.resetFrames + 1
+        if c.resetFrames &gt;= c.resetCount*5 and c.resetCount &lt;= 5 then
+            c.setPattern()
+            c.resetFrames = 0
+            c.resetCount = c.resetCount + 1
+            sound.reset:rewind()
+            sound.reset:play()
+        end
+        if c.estrus &lt; 0.1 then
+            return "relaxed"
+        end
+    end)
+},
+</code></pre>
+
+<p>The above behavior is responsible for the critter's skin pattern being regenerated (with the click sound played each time) as it recovers from a certain event.</p>
+
+<p>The critter's "estrus" value also drives a "hueshift" value; the higher the estrus, the faster the hue shifts.</p>
+
+<h2>Visual Display</h2>
+
+<p>I absolutely adore the pixelated, limited-color look of computers from my childhood; I grew up with a Commodore 64, and really came into game programming on VGA mode 0x13 (or, mode 13h as I called it back then, due to primarily doing game dev in Turbo Pascal). I knew right away that I'd want to do something evocative of that. To that end, I opted to make the color picker specifically be a simple HSV-ish picker with a limited selection and a pattern dither.</p>
+
+<p>There's also a neat trick that used to be used in games and demos a lot but has been more or less forgotten since then: static UV maps. This trick was used a lot to speed up fake "3D" rendering, for example the <a href="https://youtu.be/4ncoe_hHrfs?t=2m40s">inside of a tunnel</a> or complex <a href="https://youtu.be/rFv7mHTf0nA?t=6m58s">reflections</a> and <a href="https://youtu.be/rFv7mHTf0nA?t=3m56s">projections</a> in 3D space. The idea is pretty simple - rather than store the texture coordinates in a bunch of vertex attributes to render, you just store them in a texture; in my case I used the red channel for U and the green channel for V. (Originally I used the blue channel to encode some other stuff but it turned out to not be useful, and instead I liked having a visible grid there for when I prepared the UV maps.)</p>
+
+<p>How I actually prepared the UV map was straightforward, as well; I created a layered gradient in Photoshop, which looks like this:</p>
+
+<p><img src="uvmap-gradient.png" alt="" title="" /></p>
+
+<p>and flattened that to a single layer, and also put some annotations in a layer above so I could maintain some level of consistency between poses; the annotated version looks like this:</p>
+
+<p><img src="uvmap-annotated.png" alt="" title="" /></p>
+
+<p>So, in order to build the UV map, I'd just grab a rectangle of texture coordinates from the flattened layer and then use various distort tools in Photoshop (mostly <a href="https://helpx.adobe.com/photoshop/using/transforming-objects.html">Warp</a> and <a href="https://helpx.adobe.com/photoshop/using/warp-images-shapes-paths.html">Puppet Warp</a>) until I got something that looked more or less like this:</p>
+
+<p><img src="default-uvmap-composite.png" alt="" title="" /></p>
+
+<p>Because of the way that UV maps work, however, I actually separated them out into separate non-overlapping layers, like this:</p>
+
+<p><img src="default-uv1.png" alt="" title="" /> <img src="default-uv2.png" alt="" title="" /> <img src="default-uv3.png" alt="" title="" /> <img src="default-uv4.png" alt="" title="" /></p>
+
+<p>and then wrote an ImageMagick script to resize them to the target resolution and composite them without blending, to avoid any weird things where things overlap.</p>
+
+<p>The actual render process is as follows:</p>
+
+<ul>
+<li>Use the UV map to render the warped texture into an offscreen buffer</li>
+<li>Render the offscreen buffer to the screen using a hue-shift shader (the hue shift is controlled by part of the critter's internal state, as described later)</li>
+<li>Render the other layers (overlay, blush, pupils, halo) with their respective appropriate shaders</li>
+</ul>
+
+<p>Originally I rendered to a 384x256 offscreen framebuffer, which I then resampled to fit the window (using nearest-neighbor filtering). However, I found that this was a little too blurry and pixelated with my art, so I eventually increased this to 768x512. In retrospect I should have probably made all the size computations a bit more flexible instead of being all ad-hoc and hand-edited, but hey, it's a game jam.</p>
+
+<h2>Painting</h2>
+
+<p>There are two modes of painting that can take place - you can paint into the background (which is also the underlying texture of the critter), and you can paint onto the critter directly. The way that works is pretty simple - when the paint operation happens, it looks up the critter uvmap under the cursor, and if it's an opaque texel, it maps the brush stroke to the corresponding UV in the texture, otherwise it just maps it directly to the texture based on position, and that's used as the terminus of the brush stroke segment. Originally I tried doing a few things where all the pixels got mapped directly so you were drawing in screen space, but I couldn't get that to work well because of the problems of trying to map a many-to-many relationship in a pixel shader.</p>
+
+<p>When painting, it also needs to handle strokes that have discontinuities between different body parts, or where they cross over between background and foreground painting. For that I just use a heuristic - if a stroke's distance is substantially higher in texture space than in screen space, then it's assumed to be a discontinuity, and that's the end of it.</p>
+
+<p>The strokes themselves are just stored as queues of point and radius, which makes it easier to decouple the display of the paint-stroke overlay (which happens during render ticks) from the rendering into the texture (which happens during update ticks). The strokes are rendered by putting a circle at each point, and drawing a polygon along the stroke where the endpoints are widened by the endpoints' radius perpendicular to the direction of the stroke.</p>
+
+<p>The color is also given the inverse of the hue shift transform at render time; since I'm using the <a href="https://beesbuzz.biz/code/hsv_color_transforms.php">affine YIQ-space transform</a> it's not always reversed correctly but it's usually Close Enough that you don't notice the disparity between your pre-shifted paint color and the de-shifted/re-shifted result.</p>
+
+<h2>Other visual effects</h2>
+
+<p>There are a bunch of purely visual (rather than gameplay) effects of note. One of them is that on every frame, the critter's skin undergoes a couple of perturbation effects; isolated pixels get replaced by whichever neighboring color is the strongest (using a ridiculously brute-force shader), and as the critter's anxiety and itchiness levels increase, the texture pixels get shuffled more and more. The shuffling effect is done using the same UV map shader as in rendering; it just gets a UV map that maps input 1:1 to output, except with some of them perturbed.</p>
+
+<p>In one of the behavior states, there's a smearing effect that occurs; that was actually a rendering error I stumbled into because of an implementation detail on the shuffle effect and I decided to make it a purposeful thing.</p>
+
+<p>The critter's blush is a layer that's just applied and modulated by a simple ramp function that's based on the estrus level. Same goes for how much it vibrates in a certain circumstance. The halo that sometimes appears was a last-minute addition, and has some embarrassingly ad-hoc code around it as a result.</p>
+
+<h2>Miscellaneous stuff</h2>
+
+<p>There's a debug mode that you can activate by pressing left-control, pressing left-shift, releasing left-control, then finally pressing left-alt. This enables a display of the internal state (gauges and UV map), and also enables a bunch of keys for overriding poses and running my automated smoke tests. The smoke tests were useful in tracking down some cases where states ended up being unreachable or where an infinite loop occurred because of conflicting rules in the state graph. When building complex behavior state machines I highly recommend doing as much automated testing as possible. As it stands my smoke tests don't actually test things quite how I'd like, but I didn't really have time to spend on doing it right.</p>
+
+<p>With the debug mode active, you can also press the <code>0</code> key to regenerate the critter's skin pattern. I had way too much fun making the various pattern generators. Really, my kink is for tacky sweater patterns when you come right down to it.</p>
+
+<p>The game sound was pretty simple to put together. I just made little click/beep/etc. noises in Logic. The most difficult thing was the pencil scratch noises, which involved a bunch of echos and flanges on a white noise generator, looped. The pencil scratch sound is actually constantly playing in the background and the game just changes the volume level based on how fast the mouse moves with the button down.</p>
+
+<h2>The behavior state graph</h2>
+
+<p><img src="states.png" alt="" title="" /></p>
+
+<h2>All visible poses</h2>
+
+<p>angry: <img src="angry.png" alt="angry" title="" />
+anxious: <img src="anxious.png" alt="anxious" title="" />
+aroused: <img src="aroused.png" alt="aroused" title="" />
+default: <img src="default.png" alt="default" title="" />
+frustrated: <img src="frustrated.png" alt="frustrated" title="" />
+hyperorgasm: <img src="hyperorgasm.png" alt="hyperorgasm" title="" />
+hyperrefractory: <img src="hyperrefractory.png" alt="hyperrefractory" title="" />
+orgasm: <img src="orgasm.png" alt="orgasm" title="" />
+refractory: <img src="refractory.png" alt="refractory" title="" />
+relaxed: <img src="relaxed.png" alt="relaxed" title="" />
+squirm: <img src="squirm.png" alt="squirm" title="" /></p>
+
+<p></body></html></p>

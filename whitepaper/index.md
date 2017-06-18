@@ -10,7 +10,7 @@
 
 ## Motivation
 
-As a kid I enjoyed making weird little experimental games all the time, but aside from a year at Ubisoft I'd not really been doing any game development for quite some time. So when I decided to go indie in January I realized I needed to start with something simple. Fortunately, [eevee](http://eev.ee) was running a [game jam](http://itch.io/jam/strawberry-jam) with a theme I appreciated at just the right time for me to join in.
+As a kid I enjoyed making weird little experimental games all the time, but the last time I'd done any serious game development was a year-long stint at Ubisoft from 2004-2005. So when I decided to go indie in January I realized I needed to start with something simple. Fortunately, [eevee](http://eev.ee) was running [yet another game jam](http://itch.io/jam/strawberry-jam) with a theme I appreciated at just the right time for me to join in.
 
 I had quite a few ideas for a theme-fitting game, but I had just had [GRS](https://en.wikipedia.org/wiki/Sex_reassignment_surgery) at the end of January and didn't have a lot of energy or attention to work on things, so I knew I had to keep it simple. Part of my surgery recovery had me thinking of my body as something of a tamagotchi, needing the right sorts of stimulation at the right time to keep myself from going crazy; one of my working ideas was called "Tamacrotchi" and was based specifically on what I was doing for my recovery.
 
@@ -32,7 +32,7 @@ Most of all I just wanted people to have fun trying to color the critter in what
 
 ## Critter State
 
-The critter itself is made of three parts, code-wise: there's a set of "gauges" (not the best term, but it was the internal terminology for a similar concept on [Sprung](https://en.wikipedia.org/wiki/Sprung_(video_game)) and it's mentally stuck for me), a behavior graph (state machine) that is driven by those, and a pose (selected by the behavior graph). The gauges are as follows:
+The critter itself is made of three parts, code-wise: there's a set of "gauges" (not the best term, but it was the internal terminology for a similar concept on [Sprung](https://en.wikipedia.org/wiki/Sprung_%28video_game%29) and it's mentally stuck for me), a behavior graph (state machine) that is driven by those, and a pose (selected by the behavior graph). The gauges are as follows:
 
 * Anxiety: increases as the mouse moves while the critter isn't being touched
 * Itchy: increases while the critter isn't being touched
@@ -149,16 +149,41 @@ The game sound was pretty simple to put together. I just made little click/beep/
 
 ## All visible poses
 
-angry: ![angry](angry.png)
-anxious: ![anxious](anxious.png)
-aroused: ![aroused](aroused.png)
-default: ![default](default.png)
-frustrated: ![frustrated](frustrated.png)
-hyperorgasm: ![hyperorgasm](hyperorgasm.png)
-hyperrefractory: ![hyperrefractory](hyperrefractory.png)
-orgasm: ![orgasm](orgasm.png)
-refractory: ![refractory](refractory.png)
-relaxed: ![relaxed](relaxed.png)
-squirm: ![squirm](squirm.png)
+### angry
+![angry](angry.png)
+
+### anxious
+
+![anxious](anxious.png)
+
+### aroused
+
+![aroused](aroused.png)
+
+### default
+
+![default](default.png)
+
+### frustrated
+
+![frustrated](frustrated.png)
+
+### hyperorgasm
+![hyperorgasm](hyperorgasm.png)
+
+### hyperrefractory
+![hyperrefractory](hyperrefractory.png)
+
+### orgasm
+![orgasm](orgasm.png)
+
+### refractory
+![refractory](refractory.png)
+
+### relaxed
+![relaxed](relaxed.png)
+
+### squirm
+![squirm](squirm.png)
 
 </body></html>

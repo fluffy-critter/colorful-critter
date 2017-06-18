@@ -32,7 +32,7 @@ Most of all I just wanted people to have fun trying to color the critter in what
 
 ## Critter State
 
-The critter itself is made of three parts, code-wise: there's a set of "gauges" (not the best term, but it was the internal terminology for a similar concept on [Sprung](https://en.wikipedia.org/wiki/Sprung_(video_game)) and it's mentally stuck for me), a behavior graph (state machine) that is driven by those, and a pose (selected by the behavior graph). The gauges are as follows:
+The critter itself is made of three parts, code-wise: there's a set of "gauges" (not the best term, but it was the internal terminology for a similar concept on [Sprung](https://en.wikipedia.org/wiki/Sprung_%28video_game%29) and it's mentally stuck for me), a behavior graph (state machine) that is driven by those, and a pose (selected by the behavior graph). The gauges are as follows:
 
 * Anxiety: increases as the mouse moves while the critter isn't being touched
 * Itchy: increases while the critter isn't being touched

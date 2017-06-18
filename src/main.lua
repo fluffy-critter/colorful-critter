@@ -2,7 +2,7 @@
 
 Colorful Critter
 
-(c)2017 fluffy @ beesbuzz.biz, all rights reserved
+(c)2017 fluffy @ beesbuzz.biz. Please see the LICENSE file for license information.
 
 ]]
 
@@ -17,7 +17,6 @@ local muteButton = {
     muted = false,
 
     state = "out",  -- "out" "hover" "active"
-
 
     colors = {
         out = {0 , 0, 0},

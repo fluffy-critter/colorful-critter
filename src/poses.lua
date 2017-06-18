@@ -1,6 +1,6 @@
 --[[Colorful Critter
 
-(c)2017 fluffy @ beesbuzz.biz, all rights reserved
+(c)2017 fluffy @ beesbuzz.biz. Please see the LICENSE file for license information.
 
 poses.lua - critter poses
 

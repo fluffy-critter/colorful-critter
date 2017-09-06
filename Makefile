@@ -36,12 +36,12 @@ LOVE_VERSION=0.10.2
 .PHONY: love-bundle osx win32 win64
 .PHONY: assets
 
-all: love-bundle osx win32 win64
+all: love-bundle osx win32 win64 whitepaper
 
 clean:
 	rm -rf build
 
-publish: publish-love publish-osx publish-win32 publish-win64 publish-status
+publish: publish-love publish-osx publish-win32 publish-win64 publish-whitepaper publish-status
 
 publish-status:
 	butler status $(TARGET)

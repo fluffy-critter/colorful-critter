@@ -1,54 +1,28 @@
 uniform vec2 size; // texture size, in texels
 
 vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
-    vec2 pos = texture_coords*size;
+    vec2 ss = vec2(1.0, 1.0)/size;
 
-    vec3 offsets[9] = vec3[9](
-        vec3(0,0,2),
-        vec3(1,0,1),
-        vec3(0,1,1),
-        vec3(-1,0,1),
-        vec3(0,-1,1),
-        vec3(1,1,.7),
-        vec3(1,-1,.7),
-        vec3(-1,1,.7),
-        vec3(-1,-1,.7)
+    vec4 val[5] = vec4[5](
+        Texel(texture, texture_coords),
+        Texel(texture, texture_coords + vec2(ss.x,0)),
+        Texel(texture, texture_coords - vec2(ss.x,0)),
+        Texel(texture, texture_coords + vec2(0,ss.y)),
+        Texel(texture, texture_coords - vec2(0,ss.y))
     );
 
-    vec4 colors[9];
-    float counts[9];
-    int allocated = 0;
+    int count[5] = int[5](0,0,0,0,0);
 
-    float maxCount = 0.0;
-    vec4 maxColor;
-
-    // TODO: unroll? seems to perform fine, at least on my Mac Pro...
-    for (int i = 0; i < 9; i++) {
-        vec2 pos = texture_coords + offsets[i].xy/size;
-        vec4 here = Texel(texture, pos);
-        float weight = offsets[i].z;
-
-        int k;
-        for (k = 0; k < 9 && k < allocated; k++) {
-            if (colors[k] == here) {
-                counts[k] += weight;
-                break;
-            }
-        }
-
-        // didn't find it already, allocate a new color cell
-        if (k == allocated) {
-            colors[k] = here;
-            counts[k] = weight;
-            ++allocated;
-        }
-
-        // check for new winner
-        if (counts[k] > maxCount) {
-            maxCount = counts[k];
-            maxColor = colors[k];
+    for (int i = 0; i < 4; i++) {
+        for (int j = i + 1; j < 5; j++) {
+            count[i] += (val[i] == val[j]) ? 1 : 0;
         }
     }
 
-    return maxColor;
+    int maxc = 0;
+    for (int i = 1; i < 5; i++) {
+        maxc = (count[i] > count[maxc]) ? i : maxc;
+    }
+
+    return color*val[maxc];
 }

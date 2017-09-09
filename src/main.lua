@@ -6,10 +6,15 @@ Colorful Critter
 
 ]]
 
+local piefiller = require('piefiller')
+local Pie = piefiller:new()
+
 local patterns = require('patterns')
 local states = require('states')
 local poses = require('poses')
 local sound = require('sound')
+
+local ffi = require('ffi')
 
 local DEBUG = false
 local paused = false
@@ -213,6 +218,10 @@ function love.load()
     skin.jigglerImage = love.graphics.newImage(skin.jigglerData)
     skin.jigglerImage:setFilter("nearest", "nearest")
 
+    skin.jigglerData:mapPixel(function(x,y,r,g,b,a)
+        return x,y,255,255
+    end)
+
     -- preload all the poses
     for _,p in pairs(poses) do
         setPose(p)
@@ -230,6 +239,8 @@ function love.load()
 end
 
 function love.draw()
+    if Pie then Pie:attach() end
+
     local cx = critter.x
     local cy = critter.y
     if critter.estrus > 1.5 then
@@ -386,6 +397,8 @@ function love.draw()
                 critter.anxiety, critter.itchy, critter.estrus, critter.hueshift*180/math.pi%360),
             love.graphics.getWidth()/2, 0)
     end
+
+    if Pie then Pie:detach(); Pie:draw() end
 end
 
 local function reduceChromatophores(front, back, x, y, w, h)
@@ -443,36 +456,64 @@ local function pumpStateGraph(critter)
     return nextPose
 end
 
+function love.mousepressed(...)
+    -- local x, y, button, istouch = ...
+
+    if Pie then Pie:mousepressed(...) end
+end
+
+local ImageData_Pixel = ffi.typeof("ImageData_Pixel *")
+
+local function jiggle()
+    -- store the pixels which need unmangling (faster than remapping the image every frame)
+    local toUndo = {}
+
+    -- got this by digging into ImageData.lua from love
+    local pixels = ffi.cast(ImageData_Pixel, skin.jigglerData:getPointer())
+
+    for i=0,critter.anxiety do
+        local sx = math.random(0,255)
+        local sy = math.random(0,255)
+        local dx = math.floor(sx + math.random(-critter.itchy,critter.itchy))%256
+        local dy = math.floor(sy + math.random(-critter.itchy,critter.itchy))%256
+
+        local sp = pixels[sy*256 + sx]
+        local dp = pixels[dy*256 + dx]
+        sp.r, dp.r = dp.r, sp.r
+        sp.g, dp.g = dp.g, sp.g
+        sp.b, dp.b = dp.b, sp.b
+
+        table.insert(toUndo, {sx, sy})
+        table.insert(toUndo, {dx, dy})
+    end
+    skin.jigglerImage:refresh()
+
+    skin.back:renderTo(function()
+        love.graphics.setShader(shaders.remap)
+        shaders.remap:send("referred", skin.front)
+        love.graphics.setColor(255,255,255)
+        love.graphics.draw(skin.jigglerImage)
+        love.graphics.setShader()
+    end)
+    skin.front,skin.back = skin.back,skin.front
+
+    -- unmanble the pixels
+    for _,pos in ipairs(toUndo) do
+        local px = pixels[pos[2]*256 + pos[1]]
+        px.r = pos[1]
+        px.g = pos[2]
+    end
+end
+
 function love.update(dt)
+    if Pie then Pie:attach() end
+
     critter.hueshift = critter.hueshift + math.pow(critter.estrus,4)*dt/10
     critter.haloBright = critter.haloBright*(1 - dt/5) + critter.estrus*dt/5;
 
     -- jiggle the chromatophores a bit based on critter's anxiety
     if critter.anxiety > 0 then
-        skin.jigglerData:mapPixel(function(x,y,r,g,b,a)
-            return x,y,255,255
-        end)
-        for i=0,critter.anxiety do
-            local sx = math.random(0,255)
-            local sy = math.random(0,255)
-            local dx = math.floor(sx + math.random(-critter.itchy,critter.itchy))%256
-            local dy = math.floor(sy + math.random(-critter.itchy,critter.itchy))%256
-
-            local sp = {skin.jigglerData:getPixel(sx, sy)}
-            local dp = {skin.jigglerData:getPixel(dx, dy)}
-            skin.jigglerData:setPixel(sx, sy, unpack(dp))
-            skin.jigglerData:setPixel(dx, dy, unpack(sp))
-        end
-        skin.jigglerImage:refresh()
-
-        skin.back:renderTo(function()
-            love.graphics.setShader(shaders.remap)
-            shaders.remap:send("referred", skin.front)
-            love.graphics.setColor(255,255,255)
-            love.graphics.draw(skin.jigglerImage)
-            love.graphics.setShader()
-        end)
-        skin.front,skin.back = skin.back,skin.front
+        jiggle()
     end
 
     -- reduce front buffer into backbuffer
@@ -692,6 +733,8 @@ function love.update(dt)
         end
         setPose(poses[nextPose])
     end
+
+    if Pie then Pie:detach() end
 end
 
 local _debug = {
@@ -716,6 +759,8 @@ function love.keyreleased(key, sc)
 end
 
 function love.keypressed(key, sc, isRepeat)
+    if Pie then Pie:keypressed(key, sc, isRepeat) end
+
     _debugLatch("+" .. key)
 
     if DEBUG then

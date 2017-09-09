@@ -7,7 +7,10 @@ Colorful Critter
 ]]
 
 local piefiller = require('piefiller')
-local Pie = piefiller:new()
+local Pie
+if false then
+    Pie = piefiller:new()
+end
 
 local patterns = require('patterns')
 local states = require('states')
@@ -462,7 +465,13 @@ function love.mousepressed(...)
     if Pie then Pie:mousepressed(...) end
 end
 
-local ImageData_Pixel = ffi.typeof("ImageData_Pixel *")
+ffi.cdef([[
+typedef struct FFI_raw_pixel
+{
+    uint8_t r, g, b, a;
+} FFI_raw_pixel;
+]])
+local ImageData_Pixel = ffi.typeof("FFI_raw_pixel *")
 
 local function jiggle()
     -- store the pixels which need unmangling (faster than remapping the image every frame)

@@ -1,13 +1,13 @@
 uniform vec2 size; // texture size, in texels
 
 vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
-    vec2 ss = vec2(1.5, 1.5)/size;
+    vec2 ss = vec2(1.0, 1.0)/size;
 
     // unrolls brought to you by wanting to support GLSL ES 1.0
     vec4 val0 = Texel(texture, texture_coords);
     vec4 val1 = Texel(texture, texture_coords + vec2(ss.x,0));
-    vec4 val2 = Texel(texture, texture_coords - vec2(ss.x,0));
-    vec4 val3 = Texel(texture, texture_coords + vec2(0,ss.y));
+    vec4 val2 = Texel(texture, texture_coords + vec2(0,ss.y));
+    vec4 val3 = Texel(texture, texture_coords - vec2(ss.x,0));
     vec4 val4 = Texel(texture, texture_coords - vec2(0,ss.y));
 
     int count0 = (val0 == val1 ? 1 : 0)

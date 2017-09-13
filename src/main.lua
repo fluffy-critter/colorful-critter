@@ -478,12 +478,10 @@ local function jiggle()
     local pixels = ffi.cast(ImageData_Pixel, skin.jigglerData:getPointer())
 
     for i=1,critter.anxiety do
-        local sx = math.random(0,255)
-        local sy = math.random(0,255)
-        local sp = sy*256 + sx
-        local dx = (sx + math.random(-critter.itchy,critter.itchy))
-        local dy = (sy + math.random(-critter.itchy,critter.itchy))
-        local dp = bit.band(dy*256 + dx, 65535)
+        local sp = math.random(0,65535)
+        local dx = math.random(-critter.itchy,critter.itchy)
+        local dy = math.random(-critter.itchy,critter.itchy)
+        local dp = bit.band(sp + dy*256 + dx, 65535)
 
         pixels[sp], pixels[dp] = pixels[dp], pixels[sp]
 

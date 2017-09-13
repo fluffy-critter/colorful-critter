@@ -625,7 +625,7 @@ function love.update(dt)
 
         -- if the skin position jumped more than 2x the screen position, treat it as discontinuous
         local dsx, dsy = pen.skinX - prevSX, pen.skinY - prevSY
-        if math.sqrt(dsx*dsx + dsy*dsy) > distance*2 then
+        if dsx*dsx + dsy*dsy > distance*distance*4 then
             prevDrawing = false
         end
 

@@ -16,6 +16,7 @@ local patterns = require('patterns')
 local states = require('states')
 local poses = require('poses')
 local sound = require('sound')
+local bit = require('bit')
 
 local ffi = require('ffi')
 
@@ -465,35 +466,29 @@ function love.mousepressed(...)
     if Pie then Pie:mousepressed(...) end
 end
 
-ffi.cdef([[
-typedef struct FFI_raw_pixel
-{
-    uint8_t r, g, b, a;
-} FFI_raw_pixel;
-]])
-local ImageData_Pixel = ffi.typeof("FFI_raw_pixel *")
+ffi.cdef[[
+typedef struct { uint16_t src, dest; } swap_coords;
+]]
+
+local ImageData_Pixel = ffi.typeof("uint32_t *")
 
 local function jiggle()
     -- store the pixels which need unmangling (faster than remapping the image every frame)
-    local toUndo = {}
-
-    -- got this by digging into ImageData.lua from love
+    local toUndo = ffi.new("swap_coords[?]", critter.anxiety)
     local pixels = ffi.cast(ImageData_Pixel, skin.jigglerData:getPointer())
 
-    for i=0,critter.anxiety do
+    for i=1,critter.anxiety do
         local sx = math.random(0,255)
         local sy = math.random(0,255)
-        local dx = math.floor(sx + math.random(-critter.itchy,critter.itchy))%256
-        local dy = math.floor(sy + math.random(-critter.itchy,critter.itchy))%256
+        local sp = sy*256 + sx
+        local dx = (sx + math.random(-critter.itchy,critter.itchy))
+        local dy = (sy + math.random(-critter.itchy,critter.itchy))
+        local dp = bit.band(dy*256 + dx, 65535)
 
-        local sp = pixels[sy*256 + sx]
-        local dp = pixels[dy*256 + dx]
-        sp.r, dp.r = dp.r, sp.r
-        sp.g, dp.g = dp.g, sp.g
-        sp.b, dp.b = dp.b, sp.b
+        pixels[sp], pixels[dp] = pixels[dp], pixels[sp]
 
-        table.insert(toUndo, {sx, sy})
-        table.insert(toUndo, {dx, dy})
+        local tu = toUndo[critter.anxiety - i]
+        tu.src, tu.dest = sp, dp
     end
     skin.jigglerImage:refresh()
 
@@ -506,11 +501,10 @@ local function jiggle()
     end)
     skin.front,skin.back = skin.back,skin.front
 
-    -- unmanble the pixels
-    for _,pos in ipairs(toUndo) do
-        local px = pixels[pos[2]*256 + pos[1]]
-        px.r = pos[1]
-        px.g = pos[2]
+    -- unmangle the pixels
+    for i = 0, critter.anxiety - 1 do
+        local tu = toUndo[critter.anxiety - i]
+        pixels[tu.src], pixels[tu.dest] = pixels[tu.dest], pixels[tu.src]
     end
 end
 

@@ -477,7 +477,7 @@ local function jiggle()
     local toUndo = ffi.new("swap_coords[?]", critter.anxiety)
     local pixels = ffi.cast(ImageData_Pixel, skin.jigglerData:getPointer())
 
-    for i=1,critter.anxiety do
+    for i = critter.anxiety - 1, 0, -1 do
         local sp = math.random(0,65535)
         local dx = math.random(-critter.itchy,critter.itchy)
         local dy = math.random(-critter.itchy,critter.itchy)
@@ -485,7 +485,7 @@ local function jiggle()
 
         pixels[sp], pixels[dp] = pixels[dp], pixels[sp]
 
-        local tu = toUndo[critter.anxiety - i]
+        local tu = toUndo[i]
         tu.src, tu.dest = sp, dp
     end
     skin.jigglerImage:refresh()

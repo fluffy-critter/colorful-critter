@@ -53,6 +53,9 @@ local critter = {
     eyeX = 0,
     eyeY = 0,
 
+    -- virtual texture size for remapping
+    smear = 255,
+
     state = "default",
 
     -- behavior when resetting the pattern
@@ -472,12 +475,12 @@ typedef struct { uint16_t src, dest; } swap_coords;
 
 local ImageData_Pixel = ffi.typeof("uint32_t *")
 
-local function jiggle()
+local function jiggle(count)
     -- store the pixels which need unmangling (faster than remapping the image every frame)
-    local toUndo = ffi.new("swap_coords[?]", critter.anxiety)
+    local toUndo = ffi.new("swap_coords[?]", count)
     local pixels = ffi.cast(ImageData_Pixel, skin.jigglerData:getPointer())
 
-    for i = critter.anxiety - 1, 0, -1 do
+    for i = 0, count - 1 do
         local sp = math.random(0,65535)
         local dx = math.random(-critter.itchy,critter.itchy)
         local dy = math.random(-critter.itchy,critter.itchy)
@@ -493,6 +496,7 @@ local function jiggle()
     skin.back:renderTo(function()
         love.graphics.setShader(shaders.remap)
         shaders.remap:send("referred", skin.front)
+        shaders.remap:send("tgtSize", critter.smear)
         love.graphics.setColor(255,255,255)
         love.graphics.draw(skin.jigglerImage)
         love.graphics.setShader()
@@ -500,8 +504,8 @@ local function jiggle()
     skin.front,skin.back = skin.back,skin.front
 
     -- unmangle the pixels
-    for i = 0, critter.anxiety - 1 do
-        local tu = toUndo[critter.anxiety - i]
+    for i = 0, count - 1 do
+        local tu = toUndo[i]
         pixels[tu.src], pixels[tu.dest] = pixels[tu.dest], pixels[tu.src]
     end
 end
@@ -514,7 +518,7 @@ function love.update(dt)
 
     -- jiggle the chromatophores a bit based on critter's anxiety
     if critter.anxiety > 0 then
-        jiggle()
+        jiggle(math.min(critter.anxiety, 256))
     end
 
     -- reduce front buffer into backbuffer

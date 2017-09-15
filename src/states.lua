@@ -110,6 +110,7 @@ local states = {
             -- really cool effect I stumbled across accidentally :)
             c.skin.front:setFilter("linear", "linear")
             c.skin.back:setFilter("linear", "linear")
+            c.smear = 257
         end),
         nextState = (function(c)
             if c.estrus < 1.0 then
@@ -170,6 +171,7 @@ local states = {
             c.resetCount = 1
             c.skin.front:setFilter("nearest", "nearest")
             c.skin.back:setFilter("nearest", "nearest")
+            c.smear = 255
         end),
         nextState = (function(c)
             c.resetFrames = c.resetFrames + 1
@@ -192,6 +194,7 @@ local states = {
             c.resetCount = 1
             c.skin.front:setFilter("nearest", "nearest")
             c.skin.back:setFilter("nearest", "nearest")
+            c.smear = 255
         end),
         nextState = (function(c)
             c.resetFrames = c.resetFrames + 1

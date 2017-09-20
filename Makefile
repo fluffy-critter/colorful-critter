@@ -33,7 +33,7 @@ LOVE_VERSION=0.10.2
 
 .PHONY: clean all
 .PHONY: publish publish-love publish-osx publish-win32 publish-win64 publish-status publish-android
-.PHONY: love-bundle osx win32 win64 android
+.PHONY: love-bundle osx win32 win64 android android-build
 .PHONY: assets
 
 all: love-bundle osx win32 win64 whitepaper android
@@ -149,7 +149,9 @@ $(ANDROID_BUNDLE): $(DEST)/love/$(NAME).love
 	mkdir -p $(shell dirname $(ANDROID_BUNDLE))
 	cp $(^) $(@)
 
-android/app/build/outputs/apk/app-debug.apk: $(ANDROID_BUNDLE)
+android/app/build/outputs/apk/app-debug.apk: $(ANDROID_BUNDLE) android-build
+
+android-build:
 	cd android && ./gradlew assembleDebug
 
 publish-android: $(DEST)/.published-android

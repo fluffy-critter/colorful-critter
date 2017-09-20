@@ -83,3 +83,15 @@ find . -name '*.wav' -type f | while read fname ; do
         oggenc "$fname" -o "$outfile"
     fi
 done
+
+# Android app icons
+cd $BASE
+find android/app/src/main/res -name love.png | while read icon ; do
+    outdir=$(dirname $icon)
+    outfile=$outdir/critter.png
+    srcfile=$BASE/raw_assets/appicon.psd
+
+    if [ "$srcfile" -nt "$outfile" ]; then
+        convert -background none -flatten -resize $(identify -format %wx%h $icon) "$srcfile" "$outfile"
+    fi
+done

@@ -1,0 +1,3 @@
+[submodule "android"]
+	path = android
+	url = https://bitbucket.org/MartinFelis/love-android-sdl2.git

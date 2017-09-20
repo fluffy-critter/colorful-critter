@@ -134,11 +134,14 @@ $(DEST)/.published-whitepaper: whitepaper/index.html
 whitepaper/index.html: whitepaper/index.md
 	markdown $(^) > $(@)
 
-android: $(DEST)/android/$(NAME).apk
+android: android/gradlew $(DEST)/android/$(NAME).apk
 $(DEST)/android/$(NAME).apk: android/app/build/outputs/apk/app-debug.apk
 	mkdir -p $(DEST)/android
 	cp $(^) $(@)
 	cp distfiles/* $(DEST)/android
+
+android/gradlew: .gitmodules
+	git submodule update --init --remote --recursive
 
 ANDROID_BUNDLE=android/app/src/main/assets/game.love
 

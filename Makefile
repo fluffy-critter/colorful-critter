@@ -33,7 +33,7 @@ LOVE_VERSION=0.10.2
 
 .PHONY: clean all
 .PHONY: publish publish-love publish-osx publish-win32 publish-win64 publish-status publish-android
-.PHONY: love-bundle osx win32 win64 android android-build
+.PHONY: love-bundle osx win32 win64 android android-bundle android-build
 .PHONY: assets
 
 all: love-bundle osx win32 win64 whitepaper android
@@ -145,6 +145,7 @@ android/gradlew: .gitmodules
 
 ANDROID_BUNDLE=android/app/src/main/assets/game.love
 
+android-bundle: $(ANDROID_BUNDLE)
 $(ANDROID_BUNDLE): $(DEST)/love/$(NAME).love
 	mkdir -p $(shell dirname $(ANDROID_BUNDLE))
 	cp $(^) $(@)

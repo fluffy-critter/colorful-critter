@@ -32,16 +32,16 @@ NAME=ColorfulCritter
 LOVE_VERSION=0.10.2
 
 .PHONY: clean all
-.PHONY: publish publish-love publish-osx publish-win32 publish-win64 publish-status
-.PHONY: love-bundle osx win32 win64
+.PHONY: publish publish-love publish-osx publish-win32 publish-win64 publish-status publish-android
+.PHONY: love-bundle osx win32 win64 android android-bundle android-build
 .PHONY: assets
 
-all: love-bundle osx win32 win64 whitepaper
+all: love-bundle osx win32 win64 whitepaper android
 
 clean:
 	rm -rf build
 
-publish: publish-love publish-osx publish-win32 publish-win64 publish-whitepaper publish-status
+publish: publish-love publish-osx publish-win32 publish-win64 publish-whitepaper publish-android publish-status
 
 publish-status:
 	butler status $(TARGET)
@@ -133,3 +133,29 @@ $(DEST)/.published-whitepaper: whitepaper/index.html
 
 whitepaper/index.html: whitepaper/index.md
 	markdown $(^) > $(@)
+
+android: android/gradlew $(DEST)/android/$(NAME).apk
+$(DEST)/android/$(NAME).apk: android/app/build/outputs/apk/app-debug.apk
+	mkdir -p $(DEST)/android
+	cp $(^) $(@)
+	cp distfiles/* $(DEST)/android
+
+android/gradlew: .gitmodules
+	git submodule update --init --remote --recursive
+
+ANDROID_BUNDLE=android/app/src/main/assets/game.love
+
+android-bundle: $(ANDROID_BUNDLE)
+$(ANDROID_BUNDLE): $(DEST)/love/$(NAME).love
+	mkdir -p $(shell dirname $(ANDROID_BUNDLE))
+	cp $(^) $(@)
+
+android/app/build/outputs/apk/app-debug.apk: $(ANDROID_BUNDLE) android-build
+
+android-build:
+	cd android && ./gradlew assembleDebug
+
+publish-android: $(DEST)/.published-android
+$(DEST)/.published-android: $(DEST)/android/$(NAME).apk
+	butler push $(DEST)/android $(TARGET):android && touch $(@)
+

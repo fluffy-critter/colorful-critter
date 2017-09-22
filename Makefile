@@ -53,27 +53,31 @@ $(DEST)/.assets: $(shell find raw_assets -name '*.png' -or -name '*.wav')
 	touch $(@)
 
 # .love bundle
-love-bundle: $(DEST)/love/$(NAME).love
-$(DEST)/love/$(NAME).love: $(shell find $(SRC) -type f) $(DEST)/.assets $(wildcard distfiles/*)
+love-bundle: $(DEST)/love/$(NAME).love $(DEST)/.distfiles-osx
+$(DEST)/love/$(NAME).love: $(shell find $(SRC) -type f) $(DEST)/.assets
 	mkdir -p $(DEST)/love && \
 	cd $(SRC) && \
 	rm -f ../$(@) && \
 	zip -9r ../$(@) .
-	cp distfiles/* $(DEST)/love
 
 publish-love: $(DEST)/.published-love
 $(DEST)/.published-love: $(DEST)/love/$(NAME).love
 	butler push $(DEST)/love $(TARGET):love-bundle && touch $(@)
 
+# hacky way to inject the distfiles content
+$(DEST)/.distfiles-%: $(wildcard distfiles/*)
+	mkdir -p $(DEST)/$(lastword $(subst -, ,$(@)))
+	cp distfiles/* $(DEST)/$(lastword $(subst -, ,$(@)))
+	touch $(@)
+
 # macOS version
-osx: $(DEST)/osx/$(NAME).app
-$(DEST)/osx/$(NAME).app: $(DEST)/love/$(NAME).love $(wildcard osx/*) $(DEST)/deps/love.app/Contents/MacOS/love $(wildcard distfiles/*)
+osx: $(DEST)/osx/$(NAME).app $(DEST)/.distfiles-osx
+$(DEST)/osx/$(NAME).app: $(DEST)/love/$(NAME).love $(wildcard osx/*) $(DEST)/deps/love.app/Contents/MacOS/love
 	mkdir -p $(DEST)/osx
 	rm -rf $(@)
 	cp -r "$(DEST)/deps/love.app" $(@) && \
 	cp osx/Info.plist $(@)/Contents && \
 	cp $(DEST)/love/$(NAME).love $(@)/Contents/Resources
-	cp distfiles/* $(DEST)/osx
 
 publish-osx: $(DEST)/.published-osx
 $(DEST)/.published-osx: $(DEST)/osx/$(NAME).app
@@ -103,29 +107,26 @@ $(WIN64_ROOT)/love.exe:
 	unzip love-$(LOVE_VERSION)-win64.zip
 
 # Win32 version
-win32: $(DEST)/win32/$(NAME).exe
-$(DEST)/win32/$(NAME).exe: $(WIN32_ROOT)/love.exe $(DEST)/love/$(NAME).love $(wildcard distfiles/*)
+win32: $(DEST)/win32/$(NAME).exe $(DEST)/.distfiles-win32
+$(DEST)/win32/$(NAME).exe: $(WIN32_ROOT)/love.exe $(DEST)/love/$(NAME).love
 	mkdir -p $(DEST)/win32
 	cp -r $(wildcard $(WIN32_ROOT)/*.dll) $(WIN32_ROOT)/license.txt $(DEST)/win32
 	cat $(^) > $(@)
-	cp distfiles/* $(DEST)/win32
 
 publish-win32: $(DEST)/.published-win32
 $(DEST)/.published-win32: $(DEST)/win32/$(NAME).exe
 	butler push $(DEST)/win32 $(TARGET):win32 && touch $(@)
 
 # Win64 version
-win64: $(DEST)/win64/$(NAME).exe
-$(DEST)/win64/$(NAME).exe: $(WIN64_ROOT)/love.exe $(DEST)/love/$(NAME).love $(wildcard distfiles/*)
+win64: $(DEST)/win64/$(NAME).exe $(DEST)/.distfiles-win64
+$(DEST)/win64/$(NAME).exe: $(WIN64_ROOT)/love.exe $(DEST)/love/$(NAME).love
 	mkdir -p $(DEST)/win64
 	cp -r $(wildcard $(WIN64_ROOT)/*.dll) $(WIN64_ROOT)/license.txt $(DEST)/win64
 	cat $(^) > $(@)
-	cp distfiles/* $(DEST)/win64
 
 publish-win64: $(DEST)/.published-win64
 $(DEST)/.published-win64: $(DEST)/win64/$(NAME).exe
 	butler push $(DEST)/win64 $(TARGET):win64 && touch $(@)
-
 
 publish-whitepaper: $(DEST)/.published-whitepaper
 $(DEST)/.published-whitepaper: whitepaper/index.html
@@ -134,11 +135,10 @@ $(DEST)/.published-whitepaper: whitepaper/index.html
 whitepaper/index.html: whitepaper/index.md
 	markdown $(^) > $(@)
 
-android: android/gradlew $(DEST)/android/$(NAME).apk
+android: android/gradlew $(DEST)/android/$(NAME).apk $(DEST)/.distfiles-android
 $(DEST)/android/$(NAME).apk: android/app/build/outputs/apk/app-debug.apk
 	mkdir -p $(DEST)/android
 	cp $(^) $(@)
-	cp distfiles/* $(DEST)/android
 
 android/gradlew: .gitmodules
 	git submodule update --init --remote --recursive

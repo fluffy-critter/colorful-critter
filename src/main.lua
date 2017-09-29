@@ -250,11 +250,11 @@ function love.draw()
 
     local cx = critter.x
     local cy = critter.y
-    if critter.estrus > 1.5 then
-        local vib = (critter.estrus - 1.5)*(critter.estrus - 1)*2
-        cx = cx + math.random()*2*vib - vib
-        cy = cy + math.random()*2*vib - vib
-    end
+    -- if critter.estrus > 1.5 then
+    --     local vib = (critter.estrus - 1.5)*(critter.estrus - 1)*2
+    --     cx = cx + math.random()*2*vib - vib
+    --     cy = cy + math.random()*2*vib - vib
+    -- end
 
     screen.canvas:renderTo(function()
         local blushAmount = math.max(0, critter.estrus - 0.2)

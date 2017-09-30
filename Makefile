@@ -37,7 +37,7 @@ LOVE_VERSION=0.10.2
 .PHONY: assets
 .PHONY: submodules
 
-all: love-bundle osx win32 win64 whitepaper android
+all: submodules love-bundle osx win32 win64 whitepaper android
 
 clean:
 	rm -rf build

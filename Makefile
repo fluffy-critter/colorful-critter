@@ -35,6 +35,7 @@ LOVE_VERSION=0.10.2
 .PHONY: publish publish-love publish-osx publish-win32 publish-win64 publish-status publish-android
 .PHONY: love-bundle osx win32 win64 android android-bundle android-build
 .PHONY: assets
+.PHONY: submodules
 
 all: love-bundle osx win32 win64 whitepaper android
 
@@ -45,6 +46,9 @@ publish: publish-love publish-osx publish-win32 publish-win64 publish-whitepaper
 
 publish-status:
 	butler status $(TARGET)
+
+submodules:
+	git submodule update --init --recursive
 
 assets: $(DEST)/.assets
 $(DEST)/.assets: $(shell find raw_assets -name '*.png' -or -name '*.wav')
@@ -140,8 +144,7 @@ $(DEST)/android/$(NAME).apk: android/app/build/outputs/apk/app-debug.apk
 	mkdir -p $(DEST)/android
 	cp $(^) $(@)
 
-android/gradlew: .gitmodules
-	git submodule update --init --recursive
+android/gradlew:
 
 ANDROID_BUNDLE=android/app/src/main/assets/game.love
 

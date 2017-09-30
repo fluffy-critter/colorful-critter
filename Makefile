@@ -141,7 +141,7 @@ $(DEST)/android/$(NAME).apk: android/app/build/outputs/apk/app-debug.apk
 	cp $(^) $(@)
 
 android/gradlew: .gitmodules
-	git submodule update --init --remote --recursive
+	git submodule update --init --recursive
 
 ANDROID_BUNDLE=android/app/src/main/assets/game.love
 

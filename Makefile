@@ -64,7 +64,7 @@ $(DEST)/love/$(NAME).love: $(shell find $(SRC) -type f) $(DEST)/.assets
 	rm -f ../$(@) && \
 	zip -9r ../$(@) .
 
-publish-love: $(DEST)/.published-love
+publish-love: $(DEST)/.published-love $(DEST)/.distfiles-love
 $(DEST)/.published-love: $(DEST)/love/$(NAME).love
 	butler push $(DEST)/love $(TARGET):love-bundle && touch $(@)
 

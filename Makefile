@@ -81,6 +81,7 @@ $(DEST)/osx/$(NAME).app: $(DEST)/love/$(NAME).love $(wildcard osx/*) $(DEST)/dep
 	rm -rf $(@)
 	cp -r "$(DEST)/deps/love.app" $(@) && \
 	cp osx/Info.plist $(@)/Contents && \
+	cp osx/*.icns $(@)/Contents/Resources/ && \
 	cp $(DEST)/love/$(NAME).love $(@)/Contents/Resources
 
 publish-osx: $(DEST)/.published-osx

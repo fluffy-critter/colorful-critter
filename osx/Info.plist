@@ -14,7 +14,7 @@
 				<string>love</string>
 			</array>
 			<key>CFBundleTypeIconFile</key>
-			<string>GameIcon</string>
+			<string>AppIcon</string>
 			<key>CFBundleTypeName</key>
 			<string>LÖVE Project</string>
 			<key>CFBundleTypeRole</key>
@@ -56,7 +56,7 @@
 	<key>CFBundleExecutable</key>
 	<string>love</string>
 	<key>CFBundleIconFile</key>
-	<string>OS X AppIcon</string>
+	<string>AppIcon</string>
 	<key>CFBundleIdentifier</key>
 	<string>biz.beesbuzz.ColorfulCritter</string>
 	<key>CFBundleInfoDictionaryVersion</key>

@@ -16,7 +16,7 @@ function love.conf(t)
     -- t.window.vsync = false
     -- vertical padding for letterboxish thing
     t.window.height = t.window.height + 40
-    t.version = "0.10.2"
+    t.version = "11.2"
 
     t.window.title = "Colorful Critter"
 end

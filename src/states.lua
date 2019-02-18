@@ -39,7 +39,7 @@ local states = {
 
     relaxed = {
         pose = "relaxed",
-        onEnterState = (function(c)
+        onEnterState = (function()
             -- love.sound.play("sigh")
         end),
         nextState = (function(c)

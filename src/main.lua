@@ -6,12 +6,6 @@ Colorful Critter
 
 ]]
 
-local piefiller = require('piefiller')
-local Pie
-if false then
-    Pie = piefiller:new()
-end
-
 local patterns = require('patterns')
 local states = require('states')
 local poses = require('poses')
@@ -72,11 +66,11 @@ local critter = {
             local startImage = love.graphics.newImage(startState)
             love.graphics.draw(startImage)
 
-            love.graphics.setColor(math.random(128,255),math.random(128,255),math.random(128,255))
+            love.graphics.setColor(math.random(128,255)/255,math.random(128,255)/255,math.random(128,255)/255)
             love.graphics.rectangle("fill", 0, 0, 48, 48)
-            love.graphics.setColor(math.random(128,255),math.random(128,255),math.random(128,255))
+            love.graphics.setColor(math.random(128,255)/255,math.random(128,255)/255,math.random(128,255)/255)
             love.graphics.rectangle("fill", 208, 0, 48, 48)
-            love.graphics.setColor(255,255,255)
+            love.graphics.setColor(1,1,1)
         end)
     end,
 
@@ -159,7 +153,7 @@ local function drawThickLine(x0, y0, r0, x1, y1, r1)
 end
 
 local function setPose(pose)
-    function loadAssets(tbl)
+    local function loadAssets(tbl)
         local out = {}
         for idx,path in pairs(tbl) do
             if not imageCache[path] then
@@ -183,7 +177,7 @@ local function setPose(pose)
         love.graphics.setShader(shaders.threshold)
         shaders.threshold:send("threshold", 0.5)
         love.graphics.clear(0,0,0,0)
-        love.graphics.setColor(255,255,255)
+        love.graphics.setColor(1,1,1)
         love.graphics.setBlendMode("alpha", "alphamultiply")
         for _,tc in pairs(critter.texCoords) do
             love.graphics.draw(tc, critter.x, critter.y)
@@ -225,7 +219,7 @@ function love.load()
     skin.jigglerImage = love.graphics.newImage(skin.jigglerData)
     skin.jigglerImage:setFilter("nearest", "nearest")
 
-    skin.jigglerData:mapPixel(function(x,y,r,g,b,a)
+    skin.jigglerData:mapPixel(function(x,y)
         return x,y,255,255
     end)
 
@@ -246,8 +240,6 @@ function love.load()
 end
 
 function love.draw()
-    if Pie then Pie:attach() end
-
     local cx = critter.x
     local cy = critter.y
     if critter.estrus > 1.5 then
@@ -267,7 +259,7 @@ function love.draw()
         love.graphics.clear(50,70,90)
 
         -- draw the color picker
-        love.graphics.setColor(255, 255, 255)
+        love.graphics.setColor(1,1,1)
         love.graphics.draw(screen.colorPickerImage, 0, 0, 0, 2, 2)
 
         -- draw the size selector
@@ -280,9 +272,9 @@ function love.draw()
         love.graphics.ellipse("fill", 768 - 48 - 16, 48 + 16, pen.size*2, pen.size*2)
 
         -- draw the critter's skin preview
-        love.graphics.setColor(255 - blushColor[1],
-            255 - blushColor[2],
-            255 - blushColor[3])
+        love.graphics.setColor(1 - blushColor[1],
+            1 - blushColor[2],
+            1 - blushColor[3])
         love.graphics.rectangle("fill", critter.x, critter.y, 512, 512)
         love.graphics.setShader(shaders.hueshift)
         love.graphics.setBlendMode("alpha", "alphamultiply")
@@ -290,12 +282,12 @@ function love.draw()
             critter.saturation * math.cos(critter.hueshift),
             critter.saturation * math.sin(critter.hueshift)
         })
-        love.graphics.setColor(255, 255, 255, 63)
+        love.graphics.setColor(1, 1, 1, .25)
         love.graphics.draw(skin.front, critter.x, critter.y, 0, 2, 2)
         love.graphics.setShader()
 
         -- composite the critter's skin
-        love.graphics.setColor(255, 255, 255)
+        love.graphics.setColor(1, 1, 1)
         critter.canvas:renderTo(function()
             love.graphics.clear(0,0,0,0)
         end)
@@ -311,7 +303,7 @@ function love.draw()
         end)
 
         -- draw the outline
-        love.graphics.setColor(0,0,0,255)
+        love.graphics.setColor(0,0,0,1)
         for i=-1,1 do
             for j=-1,1 do
                 love.graphics.draw(critter.canvas, i, j)
@@ -319,7 +311,7 @@ function love.draw()
         end
 
         -- draw the skin
-        love.graphics.setColor(255,255,255)
+        love.graphics.setColor(1,1,1)
         love.graphics.setShader(shaders.hueshift)
         shaders.hueshift:send("basis", {
             critter.saturation * math.cos(critter.hueshift),
@@ -330,7 +322,7 @@ function love.draw()
 
         -- overlay layers
         love.graphics.setBlendMode("alpha", "alphamultiply")
-        love.graphics.setColor(255,255,255)
+        love.graphics.setColor(1,1,1)
         for _,ov in pairs(critter.overlays) do
             love.graphics.draw(ov, cx, cy)
         end
@@ -347,7 +339,7 @@ function love.draw()
         -- aww, it's.... really blushing
         if critter.halo then
             love.graphics.setBlendMode("alpha", "alphamultiply")
-            love.graphics.setColor(255, 255, 255, math.min(255, critter.haloBright*255))
+            love.graphics.setColor(1,1,1, math.min(1, critter.haloBright))
             love.graphics.setShader(shaders.hueshift)
             shaders.hueshift:send("basis", {
                 critter.saturation * math.cos(critter.hueshift*5),
@@ -375,7 +367,7 @@ function love.draw()
         paintStrokes = {prevInk}
 
         if DEBUG then
-            love.graphics.setColor(255, 255, 255)
+            love.graphics.setColor(1,1,1)
             love.graphics.draw(critter.pose, 768 - 256, 512 - 256, 0, 0.5, 0.5)
         end
 
@@ -383,7 +375,7 @@ function love.draw()
         love.graphics.setColor(unpack(muteButton.colors[muteButton.state]))
         love.graphics.rectangle("fill", 768 - 32, 512 - 32, 32, 32)
         love.graphics.setBlendMode("alpha", "alphamultiply")
-        love.graphics.setColor(255,255,255)
+        love.graphics.setColor(1,1,1)
         love.graphics.draw(muteButton.speakerIcon, 768 - 32, 512 - 32)
         if (muteButton.muted) then
             love.graphics.draw(muteButton.mutedIcon, 768 - 32, 512 - 32)
@@ -391,7 +383,7 @@ function love.draw()
     end)
 
     love.graphics.setBlendMode("alpha", "alphamultiply")
-    love.graphics.setColor(255,255,255)
+    love.graphics.setColor(1,1,1)
     blitCanvas(screen.canvas)
 
     if DEBUG then
@@ -404,11 +396,9 @@ function love.draw()
                 critter.anxiety, critter.itchy, critter.estrus, critter.hueshift*180/math.pi%360),
             love.graphics.getWidth()/2, 0)
     end
-
-    if Pie then Pie:detach(); Pie:draw() end
 end
 
-local function reduceChromatophores(front, back, x, y, w, h)
+local function reduceChromatophores(front, back)
     back:renderTo(function()
         love.graphics.setShader(shaders.reduce)
         shaders.reduce:send("size", {front:getWidth(), front:getHeight()})
@@ -417,7 +407,7 @@ local function reduceChromatophores(front, back, x, y, w, h)
     end)
 end
 
-local function pumpStateGraph(critter)
+local function pumpStateGraph()
     local curState = states[critter.state]
     local nextState
     local nextPose
@@ -463,12 +453,6 @@ local function pumpStateGraph(critter)
     return nextPose
 end
 
-function love.mousepressed(...)
-    -- local x, y, button, istouch = ...
-
-    if Pie then Pie:mousepressed(...) end
-end
-
 ffi.cdef[[
 typedef struct { uint16_t src, dest; } swap_coords;
 ]]
@@ -491,13 +475,13 @@ local function jiggle(count)
         local tu = toUndo[i]
         tu.src, tu.dest = sp, dp
     end
-    skin.jigglerImage:refresh()
+    skin.jigglerImage:replacePixels(skin.jigglerData)
 
     skin.back:renderTo(function()
         love.graphics.setShader(shaders.remap)
         shaders.remap:send("referred", skin.front)
         shaders.remap:send("tgtSize", critter.smear)
-        love.graphics.setColor(255,255,255)
+        love.graphics.setColor(1,1,1)
         love.graphics.draw(skin.jigglerImage)
         love.graphics.setShader()
     end)
@@ -511,8 +495,6 @@ local function jiggle(count)
 end
 
 function love.update(dt)
-    if Pie then Pie:attach() end
-
     critter.hueshift = critter.hueshift + math.pow(critter.estrus,4)*dt/10
     critter.haloBright = critter.haloBright*(1 - dt/5) + critter.estrus*dt/5;
 
@@ -715,31 +697,29 @@ function love.update(dt)
     local colorDistance = (math.abs(pen.color[1] - oldColor[1]) +
         math.abs(pen.color[2] - oldColor[2]) +
         math.abs(pen.color[3] - oldColor[3]))
-    if colorDistance > 8 then
+    if colorDistance > 8/255 then
         if love.mouse.isDown(2) then
-            sound.eyeDropper:rewind()
+            sound.eyeDropper:stop()
             sound.eyeDropper:play()
         else
-            sound.colorPicker:rewind()
+            sound.colorPicker:stop()
             sound.colorPicker:play()
         end
     end
 
     if pen.size ~= oldSize then
-        sound.radius:rewind()
+        sound.radius:stop()
         sound.radius:play()
     end
 
     -- finally, evaluate the state transitions
-    local nextPose = pumpStateGraph(critter)
+    local nextPose = pumpStateGraph()
     if nextPose then
         if DEBUG then
             print("nextPose=" .. nextPose)
         end
         setPose(poses[nextPose])
     end
-
-    if Pie then Pie:detach() end
 end
 
 local _debug = {
@@ -759,13 +739,11 @@ local function _debugLatch(key)
     end
 end
 
-function love.keyreleased(key, sc)
+function love.keyreleased(key)
     _debugLatch("-" .. key)
 end
 
 function love.keypressed(key, sc, isRepeat)
-    if Pie then Pie:keypressed(key, sc, isRepeat) end
-
     _debugLatch("+" .. key)
 
     if DEBUG then
@@ -832,7 +810,7 @@ function love.keypressed(key, sc, isRepeat)
                     critter.anxiety = a
                     critter.itchy = i
                     critter.estrus = e
-                    pumpStateGraph(critter)
+                    pumpStateGraph()
                     seenStates[critter.state] = true
                     transitions[state] = transitions[state] or {}
                     transitions[state][critter.state] = true

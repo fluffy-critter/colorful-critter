@@ -23,8 +23,8 @@ local muteButton = {
 
     colors = {
         out = {0 , 0, 0},
-        hover = {192, 192, 0},
-        active = {255, 255, 64},
+        hover = {.75, .75, 0},
+        active = {1, 1, .25},
     }
 }
 
@@ -95,8 +95,8 @@ local canvasPosition = {
 }
 
 local pen = {
-    color = {127,63,255,255},
-    opacity = 255,
+    color = {.5,.25,1,1},
+    opacity = 1,
     size = 5,
 
     drawing = false,
@@ -250,10 +250,10 @@ function love.draw()
 
     screen.canvas:renderTo(function()
         local blushAmount = math.max(0, critter.estrus - 0.2)
-        local blushColor = {math.min(255, 255*blushAmount),
-            math.min(63, 31*blushAmount),
-            math.min(127, 31*blushAmount),
-            math.min(255, 255*blushAmount)}
+        local blushColor = {math.min(1, blushAmount),
+            math.min(.25, .125*blushAmount),
+            math.min(.5, .125*blushAmount),
+            math.min(1, blushAmount)}
 
         love.graphics.setCanvas(screen.canvas)
         love.graphics.clear(50,70,90)
@@ -266,7 +266,7 @@ function love.draw()
         love.graphics.setColor(0,0,0)
         love.graphics.rectangle("fill", 768 - 96 - 16, 16, 96, 96)
         love.graphics.ellipse("fill", 768 - 48 - 16, 48 + 16, pen.size*2 + 4, pen.size*2 + 4)
-        love.graphics.setColor(255, 255, 255)
+        love.graphics.setColor(1,1,1)
         love.graphics.ellipse("fill", 768 - 48 - 16, 48 + 16, pen.size*2 + 2, pen.size*2 + 2)
         love.graphics.setColor(unpack(pen.color))
         love.graphics.ellipse("fill", 768 - 48 - 16, 48 + 16, pen.size*2, pen.size*2)
@@ -600,7 +600,7 @@ function love.update(dt)
             remapped = {critter.poseMap:getPixel(pen.x, pen.y)}
         end
 
-        if remapped and remapped[4] > 192 then
+        if remapped and remapped[4] > .75 then
             -- pen was on the critter, so re-draw in object space
             pen.skinX, pen.skinY = remapped[1], remapped[2]
             touched = true
@@ -697,7 +697,7 @@ function love.update(dt)
     local colorDistance = (math.abs(pen.color[1] - oldColor[1]) +
         math.abs(pen.color[2] - oldColor[2]) +
         math.abs(pen.color[3] - oldColor[3]))
-    if colorDistance > 8/255 then
+    if colorDistance > 16/255 then
         if love.mouse.isDown(2) then
             sound.eyeDropper:stop()
             sound.eyeDropper:play()

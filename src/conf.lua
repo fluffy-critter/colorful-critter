@@ -13,10 +13,10 @@ function love.conf(t)
     t.window.resizable = true
     t.window.height = 512
     t.window.width = t.window.height*3/2
-    -- t.window.vsync = false
+    t.window.vsync = 1
     -- vertical padding for letterboxish thing
     t.window.height = t.window.height + 40
-    t.version = "0.10.2"
+    t.version = "11.2"
 
     t.window.title = "Colorful Critter"
 end

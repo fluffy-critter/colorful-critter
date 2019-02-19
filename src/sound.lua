@@ -10,12 +10,12 @@ NOTE: If two sounds end up sharing the same source, they should be set up as map
 ]]
 
 local sound = {
-    pencil = love.audio.newSource("sound/pencil.ogg"),
+    pencil = love.audio.newSource("sound/pencil.ogg", "static"),
 
-    radius = love.audio.newSource("sound/noiseclick.ogg"),
-    colorPicker = love.audio.newSource("sound/c3.ogg"),
-    reset = love.audio.newSource("sound/c2.ogg"),
-    eyeDropper = love.audio.newSource("sound/c4.ogg"),
+    radius = love.audio.newSource("sound/noiseclick.ogg", "static"),
+    colorPicker = love.audio.newSource("sound/c3.ogg", "static"),
+    reset = love.audio.newSource("sound/c2.ogg", "static"),
+    eyeDropper = love.audio.newSource("sound/c4.ogg", "static"),
 }
 
 return sound

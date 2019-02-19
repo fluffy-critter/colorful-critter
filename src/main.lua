@@ -220,7 +220,7 @@ function love.load()
     skin.jigglerImage:setFilter("nearest", "nearest")
 
     skin.jigglerData:mapPixel(function(x,y)
-        return x,y,255,255
+        return x/255,y/255,1,1
     end)
 
     -- preload all the poses
@@ -494,7 +494,7 @@ local function jiggle(count)
     end
 end
 
-function love.update(dt)
+local function real_update(dt)
     critter.hueshift = critter.hueshift + math.pow(critter.estrus,4)*dt/10
     critter.haloBright = critter.haloBright*(1 - dt/5) + critter.estrus*dt/5;
 
@@ -602,7 +602,7 @@ function love.update(dt)
 
         if remapped and remapped[4] > .75 then
             -- pen was on the critter, so re-draw in object space
-            pen.skinX, pen.skinY = remapped[1], remapped[2]
+            pen.skinX, pen.skinY = remapped[1]*255, remapped[2]*255
             touched = true
         else
             -- pen wasn't on the critter, so draw in screen space
@@ -637,6 +637,8 @@ function love.update(dt)
     if not pen.drawing then
         table.insert(paintStrokes, {})
     end
+
+    love.mouse.setVisible(not pen.drawing)
 
     if muteButton.state == "out" then
         if muteButton.hovering then
@@ -721,6 +723,16 @@ function love.update(dt)
         setPose(poses[nextPose])
     end
 end
+
+local timestep = 0
+function love.update(dt)
+    timestep = timestep + dt
+    while timestep >= 1/60 do
+        real_update(1/60)
+        timestep = timestep - 1/60
+    end
+end
+
 
 local _debug = {
     sequence = {"+lctrl", "+lshift", "-lctrl", "+lalt"},

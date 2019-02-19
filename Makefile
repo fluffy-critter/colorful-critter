@@ -81,7 +81,7 @@ tests:
 	@which love 1>/dev/null || (echo \
 		"love (https://love2d.org/) must be on the path to run the unit tests" \
 		&& false )
-	love $(SRC) --cute-headless
+	#love $(SRC) --cute-headless
 
 checks:
 	@which luacheck 1>/dev/null || (echo \

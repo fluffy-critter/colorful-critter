@@ -256,7 +256,7 @@ function love.draw()
             math.min(1, blushAmount)}
 
         love.graphics.setCanvas(screen.canvas)
-        love.graphics.clear(50,70,90)
+        love.graphics.clear(50/255,70/255,90/255)
 
         -- draw the color picker
         love.graphics.setColor(1,1,1)

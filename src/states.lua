@@ -179,7 +179,7 @@ local states = {
                 c.setPattern()
                 c.resetFrames = 0
                 c.resetCount = c.resetCount + 1
-                sound.reset:rewind()
+                sound.reset:stop()
                 sound.reset:play()
             end
             if c.estrus < 0.1 then
@@ -202,7 +202,7 @@ local states = {
                 c.setPattern()
                 c.resetFrames = 0
                 c.resetCount = c.resetCount + 1
-                sound.reset:rewind()
+                sound.reset:stop()
                 sound.reset:play()
             end
             if c.estrus < 0.03 then

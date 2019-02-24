@@ -30,7 +30,7 @@ local function HSV(h, s, v)
 end
 
 local function genColors(n)
-    local firstHue = math.random(255)
+    local firstHue = math.random(0,255)
     local lastHue = firstHue + math.random(128, 192)/255
     local hue = firstHue
     local hueSpacing = (lastHue - firstHue)*1.0/n
